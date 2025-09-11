@@ -203,14 +203,6 @@
         try
         {
             var turmas = await LocalStorage.GetTurmasAsync();
-            
-            // Se não há dados, criar dados de exemplo
-            if (!turmas.Any())
-            {
-                await CreateSampleData();
-                turmas = await LocalStorage.GetTurmasAsync();
-            }
-
             CalculateStats(turmas);
         }
         catch (Exception ex)
@@ -232,45 +224,6 @@
         totalTurmas = turmas.Count;
         totalEstudantes = turmas.Sum(t => t.Estudantes.Count);
         totalDiarios = turmas.Sum(t => t.Diarios.Count);
-    }
-
-    private async Task CreateSampleData()
-    {
-        // Criar turmas de exemplo
-        var turmas = new List<Turma>
-        {
-            new Turma
-            {
-                Nome = "1º Ano A",
-                Serie = "1º Ano",
-                Estudantes = new List<Estudante>
-                {
-                    new Estudante { Nome = "Ana Silva", Email = "ana@escola.com", DataNascimento = new DateTime(2010, 5, 15) },
-                    new Estudante { Nome = "João Santos", Email = "joao@escola.com", DataNascimento = new DateTime(2010, 8, 22) },
-                    new Estudante { Nome = "Maria Costa", Email = "maria@escola.com", DataNascimento = new DateTime(2010, 3, 10) }
-                },
-                Diarios = new List<Diario>
-                {
-                    new Diario { ProfessorNome = "Prof. Maria", Disciplina = "Matemática" },
-                    new Diario { ProfessorNome = "Prof. João", Disciplina = "Português" }
-                }
-            },
-            new Turma
-            {
-                Nome = "2º Ano A",
-                Serie = "2º Ano",
-                Estudantes = new List<Estudante>(),
-                Diarios = new List<Diario>
-                {
-                    new Diario { ProfessorNome = "Prof. Ana", Disciplina = "Ciências" }
-                }
-            }
-        };
-
-        foreach (var turma in turmas)
-        {
-            await LocalStorage.AddTurmaAsync(turma);
-        }
     }
 
     private double GetPercentage(int value, int max)
