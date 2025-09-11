@@ -1,0 +1,39 @@
+@page "/cleardata"
+@using DiarioEscolar.Services
+@inject LocalStorageService LocalStorage
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<div style="padding: 2rem; text-align: center;">
+    <h2>Limpar Dados do LocalStorage</h2>
+    <p>Esta página limpa todos os dados salvos no navegador.</p>
+    
+    @if (cleared)
+    {
+        <div style="color: green; margin: 1rem 0;">
+            ✅ Dados limpos com sucesso!
+        </div>
+        <button class="btn btn-primary" @onclick="GoToHome">Ir para Dashboard</button>
+    }
+    else
+    {
+        <button class="btn btn-danger" @onclick="ClearAllData">Limpar Todos os Dados</button>
+    }
+</div>
+
+@code {
+    private bool cleared = false;
+
+    private async Task ClearAllData()
+    {
+        await JSRuntime.InvokeVoidAsync("localStorage.clear");
+        cleared = true;
+        StateHasChanged();
+    }
+
+    private void GoToHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+}

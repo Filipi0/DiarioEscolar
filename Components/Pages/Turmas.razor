@@ -1,0 +1,582 @@
+@page "/turmas"
+@using DiarioEscolar.Models
+@using DiarioEscolar.Services
+@using DiarioEscolar.Components.Shared
+@inject LocalStorageService LocalStorage
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<div class="app-container">
+    <Sidebar CurrentView="ViewType.Turmas" 
+             OnViewChange="HandleViewChange" 
+             OnBackToLanding="HandleBackToLanding" />
+    
+    <div class="main-content">
+        @if (selectedTurma != null)
+        {
+            <!-- Detalhes da Turma -->
+            <div class="turma-detail">
+                <!-- Header -->
+                <div class="header-section">
+                    <button class="back-button" @onclick="HandleBack">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m15 18-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    <div class="header-info">
+                        <h1 class="page-title">@selectedTurma.Nome</h1>
+                        <p class="page-subtitle">@selectedTurma.Serie • @selectedTurma.Estudantes.Count estudantes</p>
+                    </div>
+                </div>
+
+                <div class="detail-grid">
+                    <!-- Horários -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <svg class="section-icon blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12,6 12,12 16,14"/>
+                                </svg>
+                                <h2>Horários</h2>
+                            </div>
+                            <button class="add-button blue" @onclick="() => ShowModal(ModalType.Horario)">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14m-7-7v14"/>
+                                </svg>
+                                <span>Aula</span>
+                            </button>
+                        </div>
+
+                        <div class="items-container">
+                            @if (selectedTurma.Horarios.Any())
+                            {
+                                @foreach (var horario in selectedTurma.Horarios)
+                                {
+                                    <div class="item-card">
+                                        <div class="item-header">
+                                            <span class="day-badge">@diasSemana[horario.DiaSemana]</span>
+                                            <span class="time-text">@horario.HoraInicio - @horario.HoraFim</span>
+                                        </div>
+                                        <p class="item-title">@horario.Disciplina</p>
+                                        <p class="item-subtitle">@horario.Professor</p>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="empty-state">
+                                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12,6 12,12 16,14"/>
+                                    </svg>
+                                    <p>Nenhum horário cadastrado</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Diários -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <svg class="section-icon emerald" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+                                </svg>
+                                <h2>Diários</h2>
+                            </div>
+                            <button class="add-button emerald" @onclick="() => ShowModal(ModalType.Diario)">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14m-7-7v14"/>
+                                </svg>
+                                <span>Diário</span>
+                            </button>
+                        </div>
+
+                        <div class="items-container">
+                            @if (selectedTurma.Diarios.Any())
+                            {
+                                @foreach (var diario in selectedTurma.Diarios)
+                                {
+                                    <div class="item-card">
+                                        <p class="item-title">@diario.Disciplina</p>
+                                        <p class="item-subtitle">@diario.ProfessorNome</p>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="empty-state">
+                                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+                                    </svg>
+                                    <p>Nenhum diário cadastrado</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Estudantes -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <svg class="section-icon purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                </svg>
+                                <h2>Estudantes</h2>
+                            </div>
+                            <button class="add-button purple" @onclick="() => ShowModal(ModalType.Estudante)">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14m-7-7v14"/>
+                                </svg>
+                                <span>Aluno</span>
+                            </button>
+                        </div>
+
+                        <div class="items-container scrollable">
+                            @if (selectedTurma.Estudantes.Any())
+                            {
+                                @for (int i = 0; i < selectedTurma.Estudantes.Count; i++)
+                                {
+                                    var estudante = selectedTurma.Estudantes[i];
+                                    var index = i + 1;
+                                    <div class="student-card">
+                                        <div class="student-number">@index</div>
+                                        <span class="student-name">@estudante.Nome</span>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="empty-state">
+                                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                    </svg>
+                                    <p>Nenhum estudante cadastrado</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Lista de Turmas -->
+            <div class="turmas-listing">
+                <!-- Header -->
+                <div class="header-section">
+                    <div class="header-info">
+                        <h1 class="page-title">Gestão de Turmas</h1>
+                        <p class="page-subtitle">Organize e gerencie todas as turmas da escola</p>
+                    </div>
+                    <button class="primary-button" @onclick="() => ShowModal(ModalType.NovaTurma)">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14m-7-7v14"/>
+                        </svg>
+                        <span>Nova Turma</span>
+                    </button>
+                </div>
+
+                <!-- Turmas Table -->
+                <div class="table-container">
+                    @if (turmas.Any())
+                    {
+                        <div class="table-header">
+                            <div class="table-row">
+                                <div class="table-cell">Turma</div>
+                                <div class="table-cell">Série</div>
+                                <div class="table-cell">Estudantes</div>
+                                <div class="table-cell">Ações</div>
+                            </div>
+                        </div>
+                        <div class="table-body">
+                            @foreach (var turma in turmas)
+                            {
+                                <div class="table-row">
+                                    <div class="table-cell">
+                                        <div class="turma-info">
+                                            <div class="turma-icon">
+                                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                                                    <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                                                </svg>
+                                            </div>
+                                            <p class="turma-name">@turma.Nome</p>
+                                        </div>
+                                    </div>
+                                    <div class="table-cell">
+                                        <span class="serie-badge">@turma.Serie</span>
+                                    </div>
+                                    <div class="table-cell">
+                                        <div class="student-count">
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="9" cy="7" r="4"/>
+                                            </svg>
+                                            <span>@turma.Estudantes.Count</span>
+                                        </div>
+                                    </div>
+                                    <div class="table-cell">
+                                        <button class="view-button" @onclick="() => SelectTurma(turma.Id)">
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                            <span>Ver Detalhes</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-table">
+                            <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                            </svg>
+                            <h3>Nenhuma turma cadastrada</h3>
+                            <p>Comece criando sua primeira turma para organizar os estudantes</p>
+                            <button class="primary-button" @onclick="() => ShowModal(ModalType.NovaTurma)">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14m-7-7v14"/>
+                                </svg>
+                                <span>Criar Primeira Turma</span>
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modals -->
+@if (showModal)
+{
+    <div class="modal-overlay" @onclick="CloseModal">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h3 class="modal-title">@GetModalTitle()</h3>
+                <button class="close-button" @onclick="CloseModal">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m18 6-12 12M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                @if (currentModal == ModalType.NovaTurma)
+                {
+                    <form @onsubmit="HandleAddTurma" @onsubmit:preventDefault="true">
+                        <div class="form-group">
+                            <label>Nome da Turma</label>
+                            <input @bind="nomeTurma" type="text" placeholder="Ex: Turma A" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Série</label>
+                            <select @bind="serieTurma" required>
+                                <option value="">Selecione a série</option>
+                                <option value="1º Ano">1º Ano</option>
+                                <option value="2º Ano">2º Ano</option>
+                                <option value="3º Ano">3º Ano</option>
+                                <option value="4º Ano">4º Ano</option>
+                                <option value="5º Ano">5º Ano</option>
+                                <option value="6º Ano">6º Ano</option>
+                                <option value="7º Ano">7º Ano</option>
+                                <option value="8º Ano">8º Ano</option>
+                                <option value="9º Ano">9º Ano</option>
+                            </select>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="secondary-button" @onclick="CloseModal">Cancelar</button>
+                            <button type="submit" class="primary-button">Criar Turma</button>
+                        </div>
+                    </form>
+                }
+                else if (currentModal == ModalType.Horario)
+                {
+                    <form @onsubmit="HandleAddHorario" @onsubmit:preventDefault="true">
+                        <div class="form-group">
+                            <label>Dia da Semana</label>
+                            <select @bind="novoHorario.DiaSemana" required>
+                                <option value="">Selecione o dia</option>
+                                @for (int i = 0; i < diasSemana.Length; i++)
+                                {
+                                    <option value="@i">@diasSemana[i]</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Hora Início</label>
+                                <input @onchange="(e) => SetHoraInicio(e.Value?.ToString())" type="time" value="@novoHorario.HoraInicio" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Hora Fim</label>
+                                <input @onchange="(e) => SetHoraFim(e.Value?.ToString())" type="time" value="@novoHorario.HoraFim" required />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Disciplina</label>
+                            <input @bind="novoHorario.Disciplina" type="text" placeholder="Ex: Matemática" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Professor</label>
+                            <input @bind="novoHorario.Professor" type="text" placeholder="Ex: Prof. João Silva" required />
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="secondary-button" @onclick="CloseModal">Cancelar</button>
+                            <button type="submit" class="primary-button">Adicionar</button>
+                        </div>
+                    </form>
+                }
+                else if (currentModal == ModalType.Diario)
+                {
+                    <form @onsubmit="HandleAddDiario" @onsubmit:preventDefault="true">
+                        <div class="form-group">
+                            <label>Professor</label>
+                            <input @bind="novoDiario.ProfessorNome" type="text" placeholder="Ex: Prof. Maria Santos" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Disciplina</label>
+                            <input @bind="novoDiario.Disciplina" type="text" placeholder="Ex: Geografia" required />
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="secondary-button" @onclick="CloseModal">Cancelar</button>
+                            <button type="submit" class="primary-button">Criar Diário</button>
+                        </div>
+                    </form>
+                }
+                else if (currentModal == ModalType.Estudante)
+                {
+                    <form @onsubmit="HandleAddEstudante" @onsubmit:preventDefault="true">
+                        <div class="form-group">
+                            <label>Nome do Estudante</label>
+                            <input @bind="nomeEstudante" type="text" placeholder="Ex: Ana Silva" required />
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="secondary-button" @onclick="CloseModal">Cancelar</button>
+                            <button type="submit" class="primary-button">Adicionar</button>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Turma> turmas = new();
+    private Turma? selectedTurma = null;
+    private bool showModal = false;
+    private ModalType currentModal = ModalType.NovaTurma;
+    
+    // Form data
+    private string nomeTurma = string.Empty;
+    private string serieTurma = string.Empty;
+    private string nomeEstudante = string.Empty;
+    
+    private NovoHorarioDto novoHorario = new();
+    private NovoDiarioDto novoDiario = new();
+
+    private readonly string[] diasSemana = { "Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado" };
+
+    private enum ModalType
+    {
+        NovaTurma,
+        Horario,
+        Diario,
+        Estudante
+    }
+
+    public class NovoHorarioDto
+    {
+        public string DiaSemana { get; set; } = string.Empty;
+        public string HoraInicio { get; set; } = string.Empty;
+        public string HoraFim { get; set; } = string.Empty;
+        public string Disciplina { get; set; } = string.Empty;
+        public string Professor { get; set; } = string.Empty;
+    }
+
+    public class NovoDiarioDto
+    {
+        public string ProfessorNome { get; set; } = string.Empty;
+        public string Disciplina { get; set; } = string.Empty;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadTurmas();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadTurmas()
+    {
+        try
+        {
+            turmas = await LocalStorage.GetTurmasAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar turmas: {ex.Message}");
+        }
+    }
+
+    private void HandleViewChange(ViewType newView)
+    {
+        if (newView == ViewType.Escola)
+        {
+            Navigation.NavigateTo("/dashboard");
+        }
+        else if (newView == ViewType.Diario)
+        {
+            // Navegar para página de diários quando implementar
+        }
+    }
+
+    private void HandleBackToLanding()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private void SelectTurma(string turmaId)
+    {
+        selectedTurma = turmas.FirstOrDefault(t => t.Id == turmaId);
+    }
+
+    private void HandleBack()
+    {
+        selectedTurma = null;
+    }
+
+    private void ShowModal(ModalType modalType)
+    {
+        currentModal = modalType;
+        showModal = true;
+        
+        // Reset form data
+        nomeTurma = string.Empty;
+        serieTurma = string.Empty;
+        nomeEstudante = string.Empty;
+        novoHorario = new NovoHorarioDto();
+        novoDiario = new NovoDiarioDto();
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+
+    private string GetModalTitle()
+    {
+        return currentModal switch
+        {
+            ModalType.NovaTurma => "Nova Turma",
+            ModalType.Horario => "Nova Aula",
+            ModalType.Diario => "Novo Diário",
+            ModalType.Estudante => "Novo Estudante",
+            _ => string.Empty
+        };
+    }
+
+    private async Task HandleAddTurma()
+    {
+        if (!string.IsNullOrWhiteSpace(nomeTurma) && !string.IsNullOrWhiteSpace(serieTurma))
+        {
+            var novaTurma = new Turma
+            {
+                Nome = nomeTurma.Trim(),
+                Serie = serieTurma.Trim()
+            };
+
+            await LocalStorage.AddTurmaAsync(novaTurma);
+            await LoadTurmas();
+            CloseModal();
+        }
+    }
+
+    private async Task HandleAddHorario()
+    {
+        if (selectedTurma != null && !string.IsNullOrEmpty(novoHorario.DiaSemana))
+        {
+            var horario = new Horario
+            {
+                DiaSemana = int.Parse(novoHorario.DiaSemana),
+                HoraInicio = novoHorario.HoraInicio,
+                HoraFim = novoHorario.HoraFim,
+                Disciplina = novoHorario.Disciplina,
+                Professor = novoHorario.Professor,
+                TurmaId = selectedTurma.Id
+            };
+
+            selectedTurma.Horarios.Add(horario);
+            await LocalStorage.UpdateTurmaAsync(selectedTurma);
+            await LoadTurmas();
+            selectedTurma = turmas.FirstOrDefault(t => t.Id == selectedTurma.Id);
+            CloseModal();
+        }
+    }
+
+    private async Task HandleAddDiario()
+    {
+        if (selectedTurma != null)
+        {
+            var diario = new Diario
+            {
+                ProfessorNome = novoDiario.ProfessorNome,
+                Disciplina = novoDiario.Disciplina,
+                TurmaId = selectedTurma.Id
+            };
+
+            selectedTurma.Diarios.Add(diario);
+            await LocalStorage.UpdateTurmaAsync(selectedTurma);
+            await LoadTurmas();
+            selectedTurma = turmas.FirstOrDefault(t => t.Id == selectedTurma.Id);
+            CloseModal();
+        }
+    }
+
+    private async Task HandleAddEstudante()
+    {
+        if (selectedTurma != null && !string.IsNullOrWhiteSpace(nomeEstudante))
+        {
+            var estudante = new Estudante
+            {
+                Nome = nomeEstudante.Trim(),
+                TurmaId = selectedTurma.Id
+            };
+
+            selectedTurma.Estudantes.Add(estudante);
+            selectedTurma.Estudantes = selectedTurma.Estudantes.OrderBy(e => e.Nome).ToList();
+            
+            await LocalStorage.UpdateTurmaAsync(selectedTurma);
+            await LoadTurmas();
+            selectedTurma = turmas.FirstOrDefault(t => t.Id == selectedTurma.Id);
+            CloseModal();
+        }
+    }
+
+    private void SetHoraInicio(string? value)
+    {
+        if (!string.IsNullOrEmpty(value) && TimeOnly.TryParse(value, out var time))
+        {
+            novoHorario.HoraInicio = time.ToString("HH:mm");
+        }
+    }
+
+    private void SetHoraFim(string? value)
+    {
+        if (!string.IsNullOrEmpty(value) && TimeOnly.TryParse(value, out var time))
+        {
+            novoHorario.HoraFim = time.ToString("HH:mm");
+        }
+    }
+}

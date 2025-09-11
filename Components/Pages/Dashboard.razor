@@ -1,0 +1,280 @@
+@page "/dashboard"
+@using DiarioEscolar.Models
+@using DiarioEscolar.Services
+@using DiarioEscolar.Components.Shared
+@inject LocalStorageService LocalStorage
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<div class="app-container">
+    <Sidebar CurrentView="currentView" 
+             OnViewChange="HandleViewChange" 
+             OnBackToLanding="HandleBackToLanding" />
+    
+    <div class="main-content">
+        <div class="dashboard">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Dashboard Escola</h1>
+                <p class="dashboard-subtitle">Visão geral da sua instituição de ensino</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <p class="stat-label">Total de Turmas</p>
+                            <p class="stat-value">@totalTurmas</p>
+                        </div>
+                        <div class="stat-icon blue">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+                                <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <p class="stat-label">Total de Estudantes</p>
+                            <p class="stat-value">@totalEstudantes</p>
+                        </div>
+                        <div class="stat-icon emerald">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <p class="stat-label">Diários Ativos</p>
+                            <p class="stat-value">@totalDiarios</p>
+                        </div>
+                        <div class="stat-icon purple">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Cards -->
+            <div class="charts-grid">
+                <!-- Turmas por Série -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <svg class="chart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"></polyline>
+                            <polyline points="17,6 23,6 23,12"></polyline>
+                        </svg>
+                        <h2 class="chart-title">Turmas por Série</h2>
+                    </div>
+                    
+                    <div class="chart-content">
+                        @if (turmasPorSerie.Any())
+                        {
+                            @foreach (var item in turmasPorSerie)
+                            {
+                                <div class="chart-item">
+                                    <div class="chart-item-label">
+                                        <div class="chart-badge blue">@item.Key.Substring(0, 1)</div>
+                                        <span class="chart-series">@item.Key</span>
+                                    </div>
+                                    <div class="chart-bar-container">
+                                        <div class="chart-bar-bg">
+                                            <div class="chart-bar blue" style="width: @(GetPercentage(item.Value, turmasPorSerie.Values.Max()))%"></div>
+                                        </div>
+                                        <span class="chart-value">@item.Value</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+                                </svg>
+                                <p class="empty-text">Nenhuma turma cadastrada</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Estudantes por Série -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <svg class="chart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                        </svg>
+                        <h2 class="chart-title">Estudantes por Série</h2>
+                    </div>
+                    
+                    <div class="chart-content">
+                        @if (estudantesPorSerie.Any())
+                        {
+                            @foreach (var item in estudantesPorSerie)
+                            {
+                                <div class="chart-item">
+                                    <div class="chart-item-label">
+                                        <div class="chart-badge emerald">@item.Key.Substring(0, 1)</div>
+                                        <span class="chart-series">@item.Key</span>
+                                    </div>
+                                    <div class="chart-bar-container">
+                                        <div class="chart-bar-bg">
+                                            <div class="chart-bar emerald" style="width: @(GetPercentage(item.Value, estudantesPorSerie.Values.Max()))%"></div>
+                                        </div>
+                                        <span class="chart-value">@item.Value</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                </svg>
+                                <p class="empty-text">Nenhum estudante cadastrado</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Dictionary<string, int> turmasPorSerie = new();
+    private Dictionary<string, int> estudantesPorSerie = new();
+    private int totalTurmas;
+    private int totalEstudantes;
+    private int totalDiarios;
+    private ViewType currentView = ViewType.Escola;
+
+    protected override void OnInitialized()
+    {
+        // Não carrega dados aqui para evitar problemas de prerendering
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadDashboardData();
+            StateHasChanged();
+        }
+    }
+
+    private void HandleViewChange(ViewType newView)
+    {
+        currentView = newView;
+        
+        if (newView == ViewType.Turmas)
+        {
+            Navigation.NavigateTo("/turmas");
+        }
+        else if (newView == ViewType.Diario)
+        {
+            // Navegar para página de diários quando implementar
+        }
+        
+        StateHasChanged();
+    }
+
+    private void HandleBackToLanding()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private async Task LoadDashboardData()
+    {
+        try
+        {
+            var turmas = await LocalStorage.GetTurmasAsync();
+            
+            // Se não há dados, criar dados de exemplo
+            if (!turmas.Any())
+            {
+                await CreateSampleData();
+                turmas = await LocalStorage.GetTurmasAsync();
+            }
+
+            CalculateStats(turmas);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar dados do dashboard: {ex.Message}");
+        }
+    }
+
+    private void CalculateStats(List<Turma> turmas)
+    {
+        turmasPorSerie = turmas
+            .GroupBy(t => t.Serie)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        estudantesPorSerie = turmas
+            .GroupBy(t => t.Serie)
+            .ToDictionary(g => g.Key, g => g.Sum(t => t.Estudantes.Count));
+
+        totalTurmas = turmas.Count;
+        totalEstudantes = turmas.Sum(t => t.Estudantes.Count);
+        totalDiarios = turmas.Sum(t => t.Diarios.Count);
+    }
+
+    private async Task CreateSampleData()
+    {
+        // Criar turmas de exemplo
+        var turmas = new List<Turma>
+        {
+            new Turma
+            {
+                Nome = "1º Ano A",
+                Serie = "1º Ano",
+                Estudantes = new List<Estudante>
+                {
+                    new Estudante { Nome = "Ana Silva", Email = "ana@escola.com", DataNascimento = new DateTime(2010, 5, 15) },
+                    new Estudante { Nome = "João Santos", Email = "joao@escola.com", DataNascimento = new DateTime(2010, 8, 22) },
+                    new Estudante { Nome = "Maria Costa", Email = "maria@escola.com", DataNascimento = new DateTime(2010, 3, 10) }
+                },
+                Diarios = new List<Diario>
+                {
+                    new Diario { ProfessorNome = "Prof. Maria", Disciplina = "Matemática" },
+                    new Diario { ProfessorNome = "Prof. João", Disciplina = "Português" }
+                }
+            },
+            new Turma
+            {
+                Nome = "2º Ano A",
+                Serie = "2º Ano",
+                Estudantes = new List<Estudante>(),
+                Diarios = new List<Diario>
+                {
+                    new Diario { ProfessorNome = "Prof. Ana", Disciplina = "Ciências" }
+                }
+            }
+        };
+
+        foreach (var turma in turmas)
+        {
+            await LocalStorage.AddTurmaAsync(turma);
+        }
+    }
+
+    private double GetPercentage(int value, int max)
+    {
+        return max > 0 ? (double)value / max * 100 : 0;
+    }
+}

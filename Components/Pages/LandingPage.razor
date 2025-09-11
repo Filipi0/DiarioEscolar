@@ -1,0 +1,219 @@
+@page "/"
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+
+<div class="landing-page @(isDarkMode ? "dark" : "")">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <div class="logo-badge">
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+                        <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                    </svg>
+                    <span class="logo-text">Diário Escolar</span>
+                </div>
+                
+                <h1 class="hero-title">
+                    Gerencie sua escola de forma
+                    <span class="text-accent">moderna e eficiente</span>
+                </h1>
+                
+                <p class="hero-description">
+                    Sistema completo para gestão escolar com controle de turmas, 
+                    acompanhamento de estudantes e diário digital integrado.
+                </p>
+                
+                <button class="btn-primary" @onclick="HandleEnterSystem">
+                    <span>Entrar no Sistema</span>
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12,5 19,12 12,19"></polyline>
+                    </svg>
+                </button>
+
+                <!-- Theme Toggle -->
+                <!-- Theme Toggle -->
+                <button class="theme-toggle" @onclick="ToggleTheme" title="@(isDarkMode ? "Alternar para tema claro" : "Alternar para tema escuro")">
+                    @if (isDarkMode)
+                    {
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    }
+                    else
+                    {
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="features-section">
+        <div class="container">
+            <div class="features-header">
+                <h2 class="features-title">Tudo que você precisa em um só lugar</h2>
+                <p class="features-description">Três módulos integrados para uma gestão completa</p>
+            </div>
+
+            <div class="features-grid">
+                <!-- Dashboard Escola -->
+                <div class="feature-card blue">
+                    <div class="feature-icon blue">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Dashboard Escola</h3>
+                    <p class="feature-description">
+                        Visão geral completa da sua instituição com indicadores de turmas 
+                        e distribuição de estudantes por série.
+                    </p>
+                    <ul class="feature-list">
+                        <li class="feature-item emerald">
+                            <div class="feature-bullet emerald"></div>
+                            <span>Métricas em tempo real</span>
+                        </li>
+                        <li class="feature-item emerald">
+                            <div class="feature-bullet emerald"></div>
+                            <span>Visão consolidada</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Gestão de Turmas -->
+                <div class="feature-card emerald">
+                    <div class="feature-icon emerald">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="m22 21-3-3m0 0a5.5 5.5 0 1 1-7.78-7.78 5.5 5.5 0 0 1 7.78 7.78Z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Gestão de Turmas</h3>
+                    <p class="feature-description">
+                        Organize turmas, estudantes, horários e professores de forma 
+                        simples e intuitiva com interface moderna.
+                    </p>
+                    <ul class="feature-list">
+                        <li class="feature-item blue">
+                            <div class="feature-bullet blue"></div>
+                            <span>Cadastro simplificado</span>
+                        </li>
+                        <li class="feature-item blue">
+                            <div class="feature-bullet blue"></div>
+                            <span>Horários integrados</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Diário Digital -->
+                <div class="feature-card purple">
+                    <div class="feature-icon purple">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Diário Digital</h3>
+                    <p class="feature-description">
+                        Registre conteúdos e observações por professor com calendário 
+                        inteligente e indicadores visuais.
+                    </p>
+                    <ul class="feature-list">
+                        <li class="feature-item purple">
+                            <div class="feature-bullet purple"></div>
+                            <span>Calendário inteligente</span>
+                        </li>
+                        <li class="feature-item purple">
+                            <div class="feature-bullet purple"></div>
+                            <span>Registros organizados</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+                        <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                    </svg>
+                    <span class="footer-brand">Diário Escolar</span>
+                </div>
+                <p class="footer-description">
+                    Sistema de gestão escolar moderno e eficiente
+                </p>
+                
+            </div>
+        </div>
+    </footer>
+</div>
+
+@code {
+    private bool isDarkMode = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Carregar preferência do tema do localStorage na primeira renderização
+            try
+            {
+                var theme = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "theme");
+                var newDarkMode = theme == "dark";
+                
+                if (newDarkMode != isDarkMode)
+                {
+                    isDarkMode = newDarkMode;
+                    StateHasChanged();
+                }
+            }
+            catch
+            {
+                // Se não conseguir acessar localStorage, usar tema claro como padrão
+            }
+        }
+    }
+
+    private async Task ToggleTheme()
+    {
+        isDarkMode = !isDarkMode;
+        
+        // Salvar preferência no localStorage
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "theme", isDarkMode ? "dark" : "light");
+        }
+        catch
+        {
+            // Ignorar erros de localStorage
+        }
+        
+        StateHasChanged();
+    }
+
+    private void HandleEnterSystem()
+    {
+        Navigation.NavigateTo("/dashboard");
+    }
+}

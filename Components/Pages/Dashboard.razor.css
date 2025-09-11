@@ -1,0 +1,321 @@
+/* App Container */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    background: var(--bg-primary);
+}
+
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-secondary);
+}
+
+/* Dashboard Layout */
+.dashboard {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* Header */
+.dashboard-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.dashboard-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.dashboard-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.stat-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0 0 0.5rem 0;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 1rem;
+}
+
+.stat-icon.blue {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+}
+
+.stat-icon.emerald {
+    background: linear-gradient(135deg, #10b981, #047857);
+    color: white;
+}
+
+.stat-icon.purple {
+    background: linear-gradient(135deg, #8b5cf6, #5b21b6);
+    color: white;
+}
+
+.stat-icon .icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* Charts Grid */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.chart-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chart-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chart-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--primary);
+    margin-right: 0.75rem;
+}
+
+.chart-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.chart-content {
+    min-height: 200px;
+}
+
+.chart-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.chart-item:last-child {
+    border-bottom: none;
+}
+
+.chart-item-label {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.chart-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: white;
+    margin-right: 0.75rem;
+}
+
+.chart-badge.blue {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.chart-badge.emerald {
+    background: linear-gradient(135deg, #10b981, #047857);
+}
+
+.chart-series {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.chart-bar-container {
+    display: flex;
+    align-items: center;
+    min-width: 120px;
+}
+
+.chart-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: var(--border-light);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-right: 0.75rem;
+}
+
+.chart-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
+
+.chart-bar.blue {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.chart-bar.emerald {
+    background: linear-gradient(135deg, #10b981, #047857);
+}
+
+.chart-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 24px;
+    text-align: right;
+}
+
+/* Empty State */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 64px;
+    height: 64px;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.empty-text {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard {
+        padding: 1rem;
+    }
+
+    .dashboard-title {
+        font-size: 2rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .chart-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .chart-bar-container {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+/* Dark mode variables should be defined in main CSS */
+:root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #1a202c;
+    --text-secondary: #4a5568;
+    --text-muted: #a0aec0;
+    --border-color: #e2e8f0;
+    --border-light: #f1f5f9;
+    --primary: #3b82f6;
+    --accent: #8b5cf6;
+}
+
+.dark {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --card-bg: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted: #64748b;
+    --border-color: #334155;
+    --border-light: #475569;
+}
