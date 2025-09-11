@@ -9,6 +9,7 @@
     flex: 1;
     overflow-y: auto;
     background: var(--bg-secondary);
+    margin-left: 16rem;
 }
 
 /* Dashboard Layout */
@@ -118,6 +119,7 @@
 .stat-icon .icon {
     width: 24px;
     height: 24px;
+    object-fit: contain;
 }
 
 /* Charts Grid */
