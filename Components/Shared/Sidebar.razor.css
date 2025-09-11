@@ -125,12 +125,6 @@
     object-fit: contain;
 }
 
-/* Footer */
-.sidebar-footer {
-    padding: 1rem;
-    border-top: 1px solid #e5e7eb;
-}
-
 .version-info {
     text-align: center;
 }

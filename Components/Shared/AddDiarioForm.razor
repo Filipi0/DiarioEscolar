@@ -1,0 +1,27 @@
+@using DiarioEscolar.Dtos
+
+<form @onsubmit="HandleSubmit" @onsubmit:preventDefault="true">
+    <div class="form-group">
+        <label>Professor</label>
+        <input @bind="Diario.ProfessorNome" type="text" placeholder="Ex: Prof. Maria Santos" required />
+    </div>
+    <div class="form-group">
+        <label>Disciplina</label>
+        <input @bind="Diario.Disciplina" type="text" placeholder="Ex: Geografia" required />
+    </div>
+    <div class="modal-actions">
+        <button type="button" class="secondary-button" @onclick="OnCancel">Cancelar</button>
+        <button type="submit" class="primary-button">Criar Diário</button>
+    </div>
+</form>
+
+@code {
+    [Parameter] public NovoDiarioDto Diario { get; set; } = new();
+    [Parameter] public EventCallback<NovoDiarioDto> OnSave { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        await OnSave.InvokeAsync(Diario);
+    }
+}

@@ -10,6 +10,7 @@
     overflow-y: auto;
     background: var(--bg-secondary);
     padding: 2rem;
+    margin-left: 16rem;
 }
 
 /* Common Header */
@@ -62,26 +63,32 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    background: #4285f4;
     color: white;
     padding: 0.75rem 1.5rem;
-    border-radius: 0.75rem;
-    font-weight: 600;
-    font-size: 0.95rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
     border: none;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    transition: all 0.2s ease;
+    text-decoration: none;
 }
 
 .primary-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.6);
+    background: #3367d6;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
 }
 
-.primary-button .icon {
-    width: 1.25rem;
-    height: 1.25rem;
+.primary-button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(66, 133, 244, 0.3);
+}
+
+.primary-button svg {
+    width: 1rem;
+    height: 1rem;
 }
 
 .secondary-button {
@@ -159,16 +166,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.25rem;
+    height: 2.25rem;
     background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     border-radius: 0.75rem;
     color: white;
+    flex-shrink: 0;
 }
 
-.turma-icon .icon {
-    width: 1.25rem;
-    height: 1.25rem;
+.turma-icon svg {
+    width: 1rem;
+    height: 1rem;
 }
 
 .turma-name {
@@ -193,7 +201,7 @@
     color: var(--text-secondary);
 }
 
-.student-count .icon {
+.student-count svg {
     width: 1rem;
     height: 1rem;
 }
@@ -208,18 +216,30 @@
     align-items: center;
     gap: 0.5rem;
     color: #3b82f6;
-    background: none;
-    border: none;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.875rem;
     cursor: pointer;
     font-weight: 500;
-    transition: color 0.2s ease;
+    font-size: 1rem;
+    transition: all 0.2s ease;
 }
 
 .view-button:hover {
     color: #1d4ed8;
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
 }
 
-.view-button .icon {
+.view-button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(59, 130, 246, 0.2);
+}
+
+.view-button svg {
     width: 1rem;
     height: 1rem;
 }
@@ -253,6 +273,11 @@
 }
 
 /* Detail View */
+.turma-detail {
+    width: 100%;
+    min-height: 100vh;
+}
+
 .turma-detail .header-section {
     display: flex;
     align-items: center;
@@ -633,4 +658,53 @@
     .modal-content {
         margin: 1rem;
     }
+}
+
+/* Professor Autocomplete */
+.professor-autocomplete {
+    position: relative;
+}
+
+.suggestions-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1001;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion-item {
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background: var(--bg-secondary);
+}
+
+.professor-name {
+    display: block;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.professor-discipline {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
 }

@@ -1,0 +1,30 @@
+@using DiarioEscolar.Components.Shared
+
+<div class="section-card">
+    <div class="section-header">
+        <div class="section-title">
+            <div class="section-icon @Color">
+                @IconSvg
+            </div>
+            <h2>@Title</h2>
+        </div>
+        <button class="add-button @Color" @onclick="OnAdd">
+            @Icons.Plus
+            <span>@AddButtonText</span>
+        </button>
+    </div>
+
+    <div class="items-container @(IsScrollable ? "scrollable" : "")">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string Color { get; set; } = "blue";
+    [Parameter] public string AddButtonText { get; set; } = "Adicionar";
+    [Parameter] public bool IsScrollable { get; set; } = false;
+    [Parameter] public RenderFragment IconSvg { get; set; } = default!;
+    [Parameter] public RenderFragment ChildContent { get; set; } = default!;
+    [Parameter] public EventCallback OnAdd { get; set; }
+}

@@ -1,0 +1,9 @@
+<div class="student-card">
+    <div class="student-number">@Index</div>
+    <span class="student-name">@Name</span>
+</div>
+
+@code {
+    [Parameter] public int Index { get; set; }
+    [Parameter] public string Name { get; set; } = string.Empty;
+}

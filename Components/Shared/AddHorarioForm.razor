@@ -1,0 +1,122 @@
+@using DiarioEscolar.Dtos
+@using DiarioEscolar.Components.Shared
+
+<form @onsubmit="HandleSubmit" @onsubmit:preventDefault="true">
+    <div class="form-group">
+        <label>Dia da Semana</label>
+        <select @bind="Horario.DiaSemana" required>
+            <option value="">Selecione o dia</option>
+            @for (int i = 0; i < DiaSemana.Length; i++)
+            {
+                <option value="@i">@DiaSemana[i]</option>
+            }
+        </select>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label>Hora Início</label>
+            <input @onchange="(e) => SetHoraInicio(e.Value?.ToString())" type="time" value="@Horario.HoraInicio" required />
+        </div>
+        <div class="form-group">
+            <label>Hora Fim</label>
+            <input @onchange="(e) => SetHoraFim(e.Value?.ToString())" type="time" value="@Horario.HoraFim" required />
+        </div>
+    </div>
+    <div class="form-group professor-autocomplete">
+        <label>Professor</label>
+        <input value="@Horario.Professor"
+               @oninput="OnProfessorInput" 
+               @onfocus="OnProfessorFocus"
+               @onblur="OnProfessorBlur"
+               type="text" 
+               placeholder="Ex: Prof. João Silva" 
+               autocomplete="off"
+               required />
+        @if (showProfessorSuggestions && ProfessoresSugestoes.Any())
+        {
+            <div class="suggestions-list">
+                @foreach (var professor in ProfessoresSugestoes)
+                {
+                    <div class="suggestion-item" @onmousedown="() => SelectProfessor(professor)">
+                        <span class="professor-name">@professor</span>
+                        @if (ProfessoresDisciplinas.ContainsKey(professor))
+                        {
+                            <span class="professor-discipline"> - @ProfessoresDisciplinas[professor]</span>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+    <div class="form-group">
+        <label>Disciplina</label>
+        <input @bind="Horario.Disciplina" type="text" placeholder="Ex: Matemática" required />
+    </div>
+    <div class="modal-actions">
+        <button type="button" class="secondary-button" @onclick="OnCancel">Cancelar</button>
+        <button type="submit" class="primary-button">Adicionar</button>
+    </div>
+</form>
+
+@code {
+    [Parameter] public NovoHorarioDto Horario { get; set; } = new();
+    [Parameter] public string[] DiaSemana { get; set; } = Array.Empty<string>();
+    [Parameter] public List<string> ProfessoresSugestoes { get; set; } = new();
+    [Parameter] public Dictionary<string, string> ProfessoresDisciplinas { get; set; } = new();
+    [Parameter] public EventCallback<NovoHorarioDto> OnSave { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> OnProfessorInputChange { get; set; }
+    [Parameter] public EventCallback OnProfessorFocusEvent { get; set; }
+    [Parameter] public EventCallback OnProfessorBlurEvent { get; set; }
+    [Parameter] public EventCallback<string> OnProfessorSelect { get; set; }
+
+    private bool showProfessorSuggestions = false;
+
+    private async Task HandleSubmit()
+    {
+        await OnSave.InvokeAsync(Horario);
+    }
+
+    private void SetHoraInicio(string? value)
+    {
+        if (!string.IsNullOrEmpty(value) && TimeOnly.TryParse(value, out var time))
+        {
+            Horario.HoraInicio = time.ToString("HH:mm");
+        }
+    }
+
+    private void SetHoraFim(string? value)
+    {
+        if (!string.IsNullOrEmpty(value) && TimeOnly.TryParse(value, out var time))
+        {
+            Horario.HoraFim = time.ToString("HH:mm");
+        }
+    }
+
+    private async Task OnProfessorInput(ChangeEventArgs e)
+    {
+        Horario.Professor = e.Value?.ToString() ?? string.Empty;
+        await OnProfessorInputChange.InvokeAsync(e);
+        showProfessorSuggestions = ProfessoresSugestoes.Any();
+    }
+
+    private async Task OnProfessorFocus()
+    {
+        await OnProfessorFocusEvent.InvokeAsync();
+        showProfessorSuggestions = ProfessoresSugestoes.Any();
+    }
+
+    private async Task OnProfessorBlur()
+    {
+        await OnProfessorBlurEvent.InvokeAsync();
+        await Task.Delay(150);
+        showProfessorSuggestions = false;
+    }
+
+    private async Task SelectProfessor(string professor)
+    {
+        Horario.Professor = professor;
+        await OnProfessorSelect.InvokeAsync(professor);
+        showProfessorSuggestions = false;
+    }
+}

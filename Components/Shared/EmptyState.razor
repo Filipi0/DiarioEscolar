@@ -1,0 +1,16 @@
+@using DiarioEscolar.Components.Shared
+
+<div class="empty-state">
+    @IconSvg
+    <p>@Message</p>
+    @if (!string.IsNullOrEmpty(SubMessage))
+    {
+        <p class="sub-message">@SubMessage</p>
+    }
+</div>
+
+@code {
+    [Parameter] public RenderFragment IconSvg { get; set; } = default!;
+    [Parameter] public string Message { get; set; } = string.Empty;
+    [Parameter] public string SubMessage { get; set; } = string.Empty;
+}
