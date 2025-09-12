@@ -30,6 +30,16 @@ public class Diario
     public Dictionary<DateTime, string> Registros { get; set; } = new();
 }
 
+public class DiarioRecord
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public DateTime Data { get; set; }
+    public string Conteudo { get; set; } = string.Empty;
+    public string Observacoes { get; set; } = string.Empty;
+    public DateTime DataCriacao { get; set; } = DateTime.Now;
+    public DateTime DataAtualizacao { get; set; } = DateTime.Now;
+}
+
 public class Turma
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
