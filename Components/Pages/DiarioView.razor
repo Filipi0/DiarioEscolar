@@ -34,7 +34,9 @@
             <!-- Primeira Tela: Seleção do Educador -->
             <div class="educator-selection">
                 <div class="selection-header">
-                    <div class="icon">👨‍🏫</div>
+                    <div class="icon">
+                        <img src="/teacher.png" alt="Ícone de professor" class="icon-img" />
+                    </div>
                     <h2>Selecionar Educador</h2>
                 </div>
                 
@@ -42,7 +44,9 @@
                     <input @bind="searchTerm" @oninput="OnSearchInputChanged" 
                            placeholder="Escolha um educador" 
                            class="educator-search" />
-                    <div class="search-icon">🔍</div>
+                    <div class="search-icon">
+                        <img src="/lupa.png" alt="Ícone de busca" class="search-icon-img" />
+                    </div>
                 </div>
 
                 @if (filteredEducators.Any())
@@ -60,7 +64,7 @@
                 @if (!string.IsNullOrEmpty(searchTerm) && !filteredEducators.Any())
                 {
                     <div class="no-results">
-                        <div class="no-results-icon">👨‍🏫</div>
+                        <div class="no-results-icon"></div>
                         <h3>Escolha um Educador</h3>
                         <p>Selecione um educador acima para visualizar seus diários e registrar aulas</p>
                     </div>
@@ -173,7 +177,7 @@
                         </div>
 
                         <div class="calendar-legend">
-                            <div class="legend-item">
+                            <div class="legend-item"> 
                                 <div class="legend-color day-with-class"></div>
                                 <span>Dia de aula</span>
                             </div>
@@ -200,8 +204,10 @@
                     else
                     {
                         <div class="register-section">
-                            <div class="register-header">
-                                <h3>Registro - @selectedDate?.ToString("dd/MM/yyyy")</h3>
+                            <div class="register-header with-actions">
+                                <div>
+                                    <h3>Registro - @selectedDate?.ToString("dd/MM/yyyy")</h3>
+                                </div>
                                 <div class="register-actions">
                                     <button @onclick="SaveRecord" class="save-button" disabled="@isSaving">
                                         @if (isSaving)
@@ -210,7 +216,7 @@
                                         }
                                         else
                                         {
-                                            <span>💾 Salvar</span>
+                                            <span>Salvar</span>
                                         }
                                     </button>
                                 </div>
