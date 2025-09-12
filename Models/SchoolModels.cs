@@ -27,6 +27,7 @@ public class Diario
     public string ProfessorNome { get; set; } = string.Empty;
     public string Disciplina { get; set; } = string.Empty;
     public string TurmaId { get; set; } = string.Empty;
+    public string TurmaNome { get; set; } = string.Empty;
     public Dictionary<DateTime, string> Registros { get; set; } = new();
 }
 

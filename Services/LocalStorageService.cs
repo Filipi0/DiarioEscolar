@@ -179,21 +179,21 @@ public class LocalStorageService
     public async Task<List<Diario>> GetDiariosByEducadorAsync(string educador)
     {
         var turmas = await GetTurmasAsync();
-        return turmas
-            .SelectMany(t => t.Horarios
-                .Where(h => h.Professor == educador)
-                .Select(h => new Diario
+        
+        var educatorDiarios = turmas
+            // Projeta cada turma para sua lista de diários, garantindo que o ProfessorNome e TurmaId estão setados
+            .SelectMany(turma => turma.Diarios
+                .Where(diario => diario.ProfessorNome == educador)
+                .Select(diario => 
                 {
-                    ProfessorNome = h.Professor,
-                    Disciplina = h.Disciplina,
-                    TurmaId = t.Id,
-                    Registros = t.Diarios
-                        .FirstOrDefault(d => d.ProfessorNome == h.Professor && d.Disciplina == h.Disciplina)?.Registros 
-                        ?? new Dictionary<DateTime, string>()
+                    // Garante que as propriedades de navegação estejam preenchidas
+                    diario.TurmaId = turma.Id;
+                    diario.TurmaNome = turma.Nome;
+                    return diario;
                 }))
-            .GroupBy(d => new { d.TurmaId, d.Disciplina })
-            .Select(g => g.First())
             .ToList();
+        
+        return educatorDiarios;
     }
 
     // Métodos base do localStorage
