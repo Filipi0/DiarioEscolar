@@ -207,7 +207,7 @@
         }
         else if (currentModal == ModalType.Estudante)
         {
-            <AddEstudanteForm @bind-NomeEstudante="nomeEstudante"
+            <AddEstudanteForm @bind-Value="nomeEstudante"
                               OnSave="HandleAddEstudante"
                               OnCancel="CloseModal" />
         }
@@ -269,7 +269,7 @@
         }
         else if (newView == ViewType.Diario)
         {
-            // Navegar para página de diários quando implementar
+            Navigation.NavigateTo("/diario");
         }
     }
 

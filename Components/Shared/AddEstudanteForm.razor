@@ -1,7 +1,7 @@
 <form @onsubmit="HandleSubmit" @onsubmit:preventDefault="true">
     <div class="form-group">
         <label>Nome do Estudante</label>
-        <input @onchange="OnNomeChanged" value="@NomeEstudante" type="text" placeholder="Ex: Ana Silva" required />
+        <input @bind="Value" @bind:event="oninput" type="text" placeholder="Ex: Ana Silva" required />
     </div>
     <div class="modal-actions">
         <button type="button" class="secondary-button" @onclick="OnCancel">Cancelar</button>
@@ -10,19 +10,13 @@
 </form>
 
 @code {
-    [Parameter] public string NomeEstudante { get; set; } = string.Empty;
-    [Parameter] public EventCallback<string> NomeEstudanteChanged { get; set; }
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
     [Parameter] public EventCallback<string> OnSave { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
 
     private async Task HandleSubmit()
     {
-        await OnSave.InvokeAsync(NomeEstudante);
-    }
-
-    private async Task OnNomeChanged(ChangeEventArgs e)
-    {
-        NomeEstudante = e.Value?.ToString() ?? string.Empty;
-        await NomeEstudanteChanged.InvokeAsync(NomeEstudante);
+        await OnSave.InvokeAsync(Value);
     }
 }
