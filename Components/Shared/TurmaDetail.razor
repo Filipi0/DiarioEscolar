@@ -1,0 +1,133 @@
+@using DiarioEscolar.Models
+@using DiarioEscolar.Services
+@using DiarioEscolar.Components.Shared
+@using DiarioEscolar.Dtos
+
+<!-- Detalhes da Turma -->
+<div class="turma-detail">
+    <!-- Header -->
+    <div class="header-section">
+        <button class="back-button" @onclick="OnBack">
+            @Icons.ArrowLeft
+        </button>
+        <div class="header-info">
+            <h1 class="page-title">@SelectedTurma.Nome</h1>
+            <p class="page-subtitle">@SelectedTurma.Serie • @SelectedTurma.Estudantes.Count estudantes</p>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <!-- Horários -->
+        <SectionCard Title="Horários" 
+                     Color="blue" 
+                     AddButtonText="Aula"
+                     IconSvg="@Icons.Clock"
+                     OnAdd="() => OnShowModal.InvokeAsync(ModalType.Horario)">
+            @if (SelectedTurma.Horarios.Any())
+            {
+                @foreach (var horario in SelectedTurma.Horarios)
+                {
+                    <div class="item-card">
+                        <div class="item-content">
+                            <div class="item-header">
+                                <span class="day-badge">@DiaSemana[horario.DiaSemana]</span>
+                                <span class="time-text">@horario.HoraInicio - @horario.HoraFim</span>
+                            </div>
+                            <p class="item-title">@horario.Disciplina</p>
+                            <p class="item-subtitle">@horario.Professor</p>
+                        </div>
+                        <div class="item-actions">
+                            <button class="edit-btn small" @onclick="() => OnEditHorario.InvokeAsync(horario.Id)" title="Editar horário">
+                                <img src="pencil.png" alt="Editar" />
+                            </button>
+                            <button class="delete-btn small" @onclick="() => OnDeleteHorario.InvokeAsync((horario.Id, horario.Disciplina))" title="Excluir horário">
+                                <img src="trash.png" alt="Excluir" />
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <EmptyState IconSvg="@Icons.Clock" Message="Nenhum horário cadastrado" />
+            }
+        </SectionCard>
+
+        <!-- Diários -->
+        <SectionCard Title="Diários" 
+                     Color="emerald" 
+                     AddButtonText="Diário"
+                     IconSvg="@Icons.Book"
+                     OnAdd="() => OnShowModal.InvokeAsync(ModalType.Diario)">
+            @if (SelectedTurma.Diarios.Any())
+            {
+                @foreach (var diario in SelectedTurma.Diarios)
+                {
+                    <div class="item-card">
+                        <div class="item-content">
+                            <p class="item-title">@diario.Disciplina</p>
+                            <p class="item-subtitle">@diario.ProfessorNome</p>
+                        </div>
+                        <div class="item-actions">
+                            <button class="edit-btn small" @onclick="() => OnEditDiario.InvokeAsync(diario.Id)" title="Editar diário">
+                                <img src="pencil.png" alt="Editar" />
+                            </button>
+                            <button class="delete-btn small" @onclick="() => OnDeleteDiario.InvokeAsync((diario.Id, diario.Disciplina))" title="Excluir diário">
+                                <img src="trash.png" alt="Excluir" />
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <EmptyState IconSvg="@Icons.Book" Message="Nenhum diário cadastrado" />
+            }
+        </SectionCard>
+
+        <!-- Estudantes -->
+        <SectionCard Title="Estudantes" 
+                     Color="purple" 
+                     AddButtonText="Aluno"
+                     IconSvg="@Icons.Users"
+                     IsScrollable="true"
+                     OnAdd="() => OnShowModal.InvokeAsync(ModalType.Estudante)">
+            @if (SelectedTurma.Estudantes.Any())
+            {
+                @for (int i = 0; i < SelectedTurma.Estudantes.Count; i++)
+                {
+                    var estudante = SelectedTurma.Estudantes[i];
+                    <StudentCard Index="@(i + 1)" 
+                               Name="@estudante.Nome" 
+                               EstudanteId="@estudante.Id"
+                               OnEdit="OnEditEstudante"
+                               OnDelete="OnDeleteEstudante" />
+                }
+            }
+            else
+            {
+                <EmptyState IconSvg="@Icons.Users" Message="Nenhum estudante cadastrado" />
+            }
+        </SectionCard>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Turma SelectedTurma { get; set; } = new();
+    [Parameter] public string[] DiaSemana { get; set; } = Array.Empty<string>();
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public EventCallback<ModalType> OnShowModal { get; set; }
+    [Parameter] public EventCallback<string> OnEditEstudante { get; set; }
+    [Parameter] public EventCallback<string> OnDeleteEstudante { get; set; }
+    [Parameter] public EventCallback<string> OnEditHorario { get; set; }
+    [Parameter] public EventCallback<(string Id, string Nome)> OnDeleteHorario { get; set; }
+    [Parameter] public EventCallback<string> OnEditDiario { get; set; }
+    [Parameter] public EventCallback<(string Id, string Nome)> OnDeleteDiario { get; set; }
+
+    public enum ModalType
+    {
+        Horario,
+        Diario,
+        Estudante
+    }
+}

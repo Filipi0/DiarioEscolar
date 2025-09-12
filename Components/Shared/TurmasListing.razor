@@ -1,0 +1,89 @@
+@using DiarioEscolar.Models
+@using DiarioEscolar.Services
+
+<!-- Lista de Turmas -->
+<div class="turmas-listing">
+    <!-- Header -->
+    <div class="header-section">
+        <div class="header-info">
+            <h1 class="page-title">Gestão de Turmas</h1>
+            <p class="page-subtitle">Organize e gerencie todas as turmas da escola</p>
+        </div>
+        <button class="primary-button" @onclick="OnShowAddModal">
+            @Icons.Plus
+            <span>Nova Turma</span>
+        </button>
+    </div>
+
+    <!-- Turmas Table -->
+    <div class="table-container">
+        @if (Turmas.Any())
+        {
+            <div class="table-header">
+                <div class="table-row">
+                    <div class="table-cell">Turma</div>
+                    <div class="table-cell">Série</div>
+                    <div class="table-cell">Estudantes</div>
+                    <div class="table-cell">Ações</div>
+                </div>
+            </div>
+            <div class="table-body">
+                @foreach (var turma in Turmas)
+                {
+                    <div class="table-row">
+                        <div class="table-cell">
+                            <div class="turma-info">
+                                <div class="turma-icon">
+                                    @Icons.School
+                                </div>
+                                <p class="turma-name">@turma.Nome</p>
+                            </div>
+                        </div>
+                        <div class="table-cell">
+                            <span class="serie-badge">@turma.Serie</span>
+                        </div>
+                        <div class="table-cell">
+                            <div class="student-count">
+                                @Icons.User
+                                <span>@turma.Estudantes.Count</span>
+                            </div>
+                        </div>
+                        <div class="table-cell">
+                            <div class="action-buttons">
+                                <button class="view-button" @onclick="() => OnSelectTurma.InvokeAsync(turma.Id)" title="Ver Detalhes">
+                                    <img src="eye.png" alt="Ver" />
+                                </button>
+                                <button class="edit-button" @onclick="() => OnEditTurma.InvokeAsync(turma)" title="Editar">
+                                    <img src="pencil.png" alt="Editar" />
+                                </button>
+                                <button class="delete-button" @onclick="() => OnDeleteTurma.InvokeAsync((turma.Id, turma.Nome))" title="Excluir">
+                                    <img src="trash.png" alt="Excluir" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-table">
+                @Icons.School
+                <h3>Nenhuma turma cadastrada</h3>
+                <p>Comece criando sua primeira turma para organizar os estudantes</p>
+                <button class="primary-button" @onclick="OnShowAddModal">
+                    @Icons.Plus
+                    <span>Criar Primeira Turma</span>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<Turma> Turmas { get; set; } = new();
+    [Parameter] public EventCallback OnShowAddModal { get; set; }
+    [Parameter] public EventCallback<string> OnSelectTurma { get; set; }
+    [Parameter] public EventCallback<Turma> OnEditTurma { get; set; }
+    [Parameter] public EventCallback<(string Id, string Nome)> OnDeleteTurma { get; set; }
+}

@@ -15,198 +15,24 @@
     <div class="main-content">
         @if (selectedTurma != null)
         {
-            <!-- Detalhes da Turma -->
-            <div class="turma-detail">
-                <!-- Header -->
-                <div class="header-section">
-                    <button class="back-button" @onclick="HandleBack">
-                        @Icons.ArrowLeft
-                    </button>
-                    <div class="header-info">
-                        <h1 class="page-title">@selectedTurma.Nome</h1>
-                        <p class="page-subtitle">@selectedTurma.Serie • @selectedTurma.Estudantes.Count estudantes</p>
-                    </div>
-                </div>
-
-                <div class="detail-grid">
-                    <!-- Horários -->
-                    <SectionCard Title="Horários" 
-                                 Color="blue" 
-                                 AddButtonText="Aula"
-                                 IconSvg="@Icons.Clock"
-                                 OnAdd="() => ShowModal(ModalType.Horario)">
-                        @if (selectedTurma.Horarios.Any())
-                        {
-                            @foreach (var horario in selectedTurma.Horarios)
-                            {
-                                <div class="item-card">
-                                    <div class="item-content">
-                                        <div class="item-header">
-                                            <span class="day-badge">@diasSemana[horario.DiaSemana]</span>
-                                            <span class="time-text">@horario.HoraInicio - @horario.HoraFim</span>
-                                        </div>
-                                        <p class="item-title">@horario.Disciplina</p>
-                                        <p class="item-subtitle">@horario.Professor</p>
-                                    </div>
-                                    <div class="item-actions">
-                                        <button class="edit-button small" @onclick="() => EditHorario(horario.Id)" title="Editar horário">
-                                            @Icons.Edit
-                                        </button>
-                                        <button class="delete-button small" @onclick="() => DeleteHorario(horario.Id, horario.Disciplina)" title="Excluir horário">
-                                            @Icons.Trash
-                                        </button>
-                                    </div>
-                                </div>
-                            }
-                        }
-                        else
-                        {
-                            <EmptyState IconSvg="@Icons.Clock" Message="Nenhum horário cadastrado" />
-                        }
-                    </SectionCard>
-
-                    <!-- Diários -->
-                    <SectionCard Title="Diários" 
-                                 Color="emerald" 
-                                 AddButtonText="Diário"
-                                 IconSvg="@Icons.Book"
-                                 OnAdd="() => ShowModal(ModalType.Diario)">
-                        @if (selectedTurma.Diarios.Any())
-                        {
-                            @foreach (var diario in selectedTurma.Diarios)
-                            {
-                                <div class="item-card">
-                                    <div class="item-content">
-                                        <p class="item-title">@diario.Disciplina</p>
-                                        <p class="item-subtitle">@diario.ProfessorNome</p>
-                                    </div>
-                                    <div class="item-actions">
-                                        <button class="edit-button small" @onclick="() => EditDiario(diario.Id)" title="Editar diário">
-                                            @Icons.Edit
-                                        </button>
-                                        <button class="delete-button small" @onclick="() => DeleteDiario(diario.Id, diario.Disciplina)" title="Excluir diário">
-                                            @Icons.Trash
-                                        </button>
-                                    </div>
-                                </div>
-                            }
-                        }
-                        else
-                        {
-                            <EmptyState IconSvg="@Icons.Book" Message="Nenhum diário cadastrado" />
-                        }
-                    </SectionCard>
-
-                    <!-- Estudantes -->
-                    <SectionCard Title="Estudantes" 
-                                 Color="purple" 
-                                 AddButtonText="Aluno"
-                                 IconSvg="@Icons.Users"
-                                 IsScrollable="true"
-                                 OnAdd="() => ShowModal(ModalType.Estudante)">
-                        @if (selectedTurma.Estudantes.Any())
-                        {
-                            @for (int i = 0; i < selectedTurma.Estudantes.Count; i++)
-                            {
-                                var estudante = selectedTurma.Estudantes[i];
-                                <StudentCard Index="@(i + 1)" 
-                                           Name="@estudante.Nome" 
-                                           EstudanteId="@estudante.Id"
-                                           OnEdit="EditEstudante"
-                                           OnDelete="DeleteEstudante" />
-                            }
-                        }
-                        else
-                        {
-                            <EmptyState IconSvg="@Icons.Users" Message="Nenhum estudante cadastrado" />
-                        }
-                    </SectionCard>
-                </div>
-            </div>
+            <TurmaDetail SelectedTurma="selectedTurma"
+                        DiaSemana="diasSemana"
+                        OnBack="HandleBack"
+                        OnShowModal="ShowModalHandler"
+                        OnEditEstudante="EditEstudante"
+                        OnDeleteEstudante="DeleteEstudante"
+                        OnEditHorario="EditHorario"
+                        OnDeleteHorario="DeleteHorario"
+                        OnEditDiario="EditDiario"
+                        OnDeleteDiario="DeleteDiario" />
         }
         else
         {
-            <!-- Lista de Turmas -->
-            <div class="turmas-listing">
-                <!-- Header -->
-                <div class="header-section">
-                    <div class="header-info">
-                        <h1 class="page-title">Gestão de Turmas</h1>
-                        <p class="page-subtitle">Organize e gerencie todas as turmas da escola</p>
-                    </div>
-                    <button class="primary-button" @onclick="ShowAddTurmaModal">
-                        @Icons.Plus
-                        <span>Nova Turma</span>
-                    </button>
-                </div>
-
-                <!-- Turmas Table -->
-                <div class="table-container">
-                    @if (turmas.Any())
-                    {
-                        <div class="table-header">
-                            <div class="table-row">
-                                <div class="table-cell">Turma</div>
-                                <div class="table-cell">Série</div>
-                                <div class="table-cell">Estudantes</div>
-                                <div class="table-cell">Ações</div>
-                            </div>
-                        </div>
-                        <div class="table-body">
-                            @foreach (var turma in turmas)
-                            {
-                                <div class="table-row">
-                                    <div class="table-cell">
-                                        <div class="turma-info">
-                                            <div class="turma-icon">
-                                                @Icons.School
-                                            </div>
-                                            <p class="turma-name">@turma.Nome</p>
-                                        </div>
-                                    </div>
-                                    <div class="table-cell">
-                                        <span class="serie-badge">@turma.Serie</span>
-                                    </div>
-                                    <div class="table-cell">
-                                        <div class="student-count">
-                                            @Icons.User
-                                            <span>@turma.Estudantes.Count</span>
-                                        </div>
-                                    </div>
-                                    <div class="table-cell">
-                                        <div class="action-buttons">
-                                            <button class="view-button" @onclick="() => SelectTurma(turma.Id)">
-                                                @Icons.Eye
-                                                <span>Ver Detalhes</span>
-                                            </button>
-                                            <button class="edit-button" @onclick="() => EditTurma(turma)">
-                                                @Icons.Edit
-                                                <span>Editar</span>
-                                            </button>
-                                            <button class="delete-button" @onclick="() => ShowDeleteTurmaConfirmation(turma.Id, turma.Nome)">
-                                                @Icons.Trash
-                                                <span>Excluir</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="empty-table">
-                            @Icons.School
-                            <h3>Nenhuma turma cadastrada</h3>
-                            <p>Comece criando sua primeira turma para organizar os estudantes</p>
-                            <button class="primary-button" @onclick="ShowAddTurmaModal">
-                                @Icons.Plus
-                                <span>Criar Primeira Turma</span>
-                            </button>
-                        </div>
-                    }
-                </div>
-            </div>
+            <TurmasListing Turmas="turmas"
+                          OnShowAddModal="ShowAddTurmaModal"
+                          OnSelectTurma="SelectTurma"
+                          OnEditTurma="EditTurma"
+                          OnDeleteTurma="ShowDeleteTurmaConfirmation" />
         }
     </div>
 </div>
@@ -221,7 +47,7 @@
 @if (showModal)
 {
     <ModalForm IsVisible="showModal" Title="@GetModalTitle()" OnClose="CloseModal">
-        @if (currentModal == ModalType.Horario)
+        @if (currentModal == TurmaDetail.ModalType.Horario)
         {
             <AddHorarioForm Horario="novoHorario"
                             DiaSemana="diasSemana"
@@ -234,13 +60,13 @@
                             OnProfessorBlurEvent="OnProfessorBlur"
                             OnProfessorSelect="SelectProfessor" />
         }
-        else if (currentModal == ModalType.Diario)
+        else if (currentModal == TurmaDetail.ModalType.Diario)
         {
             <AddDiarioForm Diario="novoDiario"
                            OnSave="HandleAddDiario"
                            OnCancel="CloseModal" />
         }
-        else if (currentModal == ModalType.Estudante)
+        else if (currentModal == TurmaDetail.ModalType.Estudante)
         {
             <AddEstudanteForm @bind-Value="nomeEstudante"
                               OnSave="HandleAddEstudante"
@@ -250,36 +76,22 @@
 }
 
 <!-- Modal de Confirmação de Exclusão -->
-@if (showDeleteConfirmation)
-{
-    <div class="modal-overlay">
-        <div class="modal-content delete-modal">
-            <div class="modal-header">
-                <h3>Confirmar Exclusão</h3>
-                <button class="close-button" @onclick="CloseDeleteConfirmation">
-                    @Icons.X
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="delete-icon">
-                    @Icons.Trash
-                </div>
-                <p>Tem certeza que deseja excluir a @deleteItemType "<strong>@deleteItemName</strong>"?</p>
-                <p class="warning-text">Esta ação não pode ser desfeita.</p>
-            </div>
-            <div class="modal-actions">
-                <button class="secondary-button" @onclick="CloseDeleteConfirmation">Cancelar</button>
-                <button class="delete-button" @onclick="ConfirmDelete">Excluir</button>
-            </div>
-        </div>
-    </div>
-}
+<ConfirmationModal IsVisible="showDeleteConfirmation"
+                   Title="Confirmar Exclusão"
+                   Message="@GetDeleteMessage()"
+                   WarningText="Esta ação não pode ser desfeita."
+                   CancelText="Cancelar"
+                   ConfirmText="Excluir"
+                   ConfirmButtonClass="danger-button"
+                   IconSvg="@Icons.Trash"
+                   OnConfirm="ConfirmDelete"
+                   OnCancel="CloseDeleteConfirmation" />
 
 @code {
     private List<Turma> turmas = new();
     private Turma? selectedTurma = null;
     private bool showModal = false;
-    private ModalType currentModal = ModalType.Horario;
+    private TurmaDetail.ModalType currentModal = TurmaDetail.ModalType.Horario;
     private bool showAddTurmaModal = false;
     private bool showDeleteConfirmation = false;
     private string deleteItemType = string.Empty;
@@ -301,13 +113,6 @@
     private Dictionary<string, string> professoresDisciplinas = new();
 
     private readonly string[] diasSemana = { "Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado" };
-
-    private enum ModalType
-    {
-        Horario,
-        Diario,
-        Estudante
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -357,7 +162,8 @@
         selectedTurma = null;
     }
 
-    private void ShowModal(ModalType modalType)
+    // Métodos para componentes
+    private void ShowModalHandler(TurmaDetail.ModalType modalType)
     {
         currentModal = modalType;
         showModal = true;
@@ -368,10 +174,39 @@
         novoDiario = new NovoDiarioDto();
         
         // Carregar sugestões de professores se for modal de horário
-        if (modalType == ModalType.Horario)
+        if (modalType == TurmaDetail.ModalType.Horario)
         {
             LoadProfessoresSugestoes();
         }
+    }
+
+    private void ShowDeleteTurmaConfirmation((string Id, string Nome) turmaInfo)
+    {
+        deleteItemType = "turma";
+        deleteItemId = turmaInfo.Id;
+        deleteItemName = turmaInfo.Nome;
+        showDeleteConfirmation = true;
+    }
+
+    private void DeleteHorario((string Id, string Nome) horarioInfo)
+    {
+        deleteItemType = "horário";
+        deleteItemId = horarioInfo.Id;
+        deleteItemName = horarioInfo.Nome;
+        showDeleteConfirmation = true;
+    }
+
+    private void DeleteDiario((string Id, string Nome) diarioInfo)
+    {
+        deleteItemType = "diário";
+        deleteItemId = diarioInfo.Id;
+        deleteItemName = diarioInfo.Nome;
+        showDeleteConfirmation = true;
+    }
+
+    private string GetDeleteMessage()
+    {
+        return $"Tem certeza que deseja excluir {deleteItemType} \"{deleteItemName}\"?";
     }
 
     private void CloseModal()
@@ -402,9 +237,9 @@
     {
         return currentModal switch
         {
-            ModalType.Horario => "Nova Aula",
-            ModalType.Diario => "Novo Diário",
-            ModalType.Estudante => "Novo Estudante",
+            TurmaDetail.ModalType.Horario => "Nova Aula",
+            TurmaDetail.ModalType.Diario => "Novo Diário",
+            TurmaDetail.ModalType.Estudante => "Novo Estudante",
             _ => string.Empty
         };
     }
@@ -606,20 +441,12 @@
         
         StateHasChanged();
     }
-    
+
     // Métodos para editar e excluir
     private void EditTurma(Turma turma)
     {
         turmaToEdit = turma;
         showAddTurmaModal = true;
-    }
-    
-    private void ShowDeleteTurmaConfirmation(string turmaId, string turmaNome)
-    {
-        deleteItemType = "turma";
-        deleteItemId = turmaId;
-        deleteItemName = turmaNome;
-        showDeleteConfirmation = true;
     }
     
     private async Task ConfirmDelete()
@@ -682,7 +509,7 @@
         {
             nomeEstudante = estudante.Nome;
             estudanteEditandoId = estudanteId;
-            currentModal = ModalType.Estudante;
+            currentModal = TurmaDetail.ModalType.Estudante;
             showModal = true;
         }
     }
@@ -714,18 +541,10 @@
                 Professor = horario.Professor
             };
             horarioEditandoId = horarioId;
-            currentModal = ModalType.Horario;
+            currentModal = TurmaDetail.ModalType.Horario;
             showModal = true;
             LoadProfessoresSugestoes();
         }
-    }
-    
-    private void DeleteHorario(string horarioId, string disciplina)
-    {
-        deleteItemType = "horário";
-        deleteItemId = horarioId;
-        deleteItemName = disciplina;
-        showDeleteConfirmation = true;
     }
     
     // Métodos para diários
@@ -740,16 +559,8 @@
                 Disciplina = diario.Disciplina
             };
             diarioEditandoId = diarioId;
-            currentModal = ModalType.Diario;
+            currentModal = TurmaDetail.ModalType.Diario;
             showModal = true;
         }
-    }
-    
-    private void DeleteDiario(string diarioId, string disciplina)
-    {
-        deleteItemType = "diário";
-        deleteItemId = diarioId;
-        deleteItemName = disciplina;
-        showDeleteConfirmation = true;
     }
 }

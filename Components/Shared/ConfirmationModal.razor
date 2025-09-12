@@ -1,0 +1,42 @@
+@using DiarioEscolar.Services
+
+@if (IsVisible)
+{
+    <div class="modal-overlay">
+        <div class="modal-content delete-modal">
+            <div class="modal-header">
+                <h3>@Title</h3>
+                <button class="close-button" @onclick="OnCancel">
+                    @Icons.X
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="delete-icon">
+                    @IconSvg
+                </div>
+                <p>@Message</p>
+                @if (!string.IsNullOrEmpty(WarningText))
+                {
+                    <p class="warning-text">@WarningText</p>
+                }
+            </div>
+            <div class="modal-actions">
+                <button class="secondary-button" @onclick="OnCancel">@CancelText</button>
+                <button class="@ConfirmButtonClass" @onclick="OnConfirm">@ConfirmText</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public string Title { get; set; } = "Confirmar Ação";
+    [Parameter] public string Message { get; set; } = "Tem certeza que deseja continuar?";
+    [Parameter] public string WarningText { get; set; } = string.Empty;
+    [Parameter] public string CancelText { get; set; } = "Cancelar";
+    [Parameter] public string ConfirmText { get; set; } = "Confirmar";
+    [Parameter] public string ConfirmButtonClass { get; set; } = "danger-button";
+    [Parameter] public RenderFragment IconSvg { get; set; } = Icons.Trash;
+    [Parameter] public EventCallback OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+}
