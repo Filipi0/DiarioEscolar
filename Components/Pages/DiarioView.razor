@@ -14,10 +14,11 @@
     
     <div class="main-content">
         <div class="diario-container">
-            <div class="header">
-                <div class="title-section">
-                    <h1 class="title">Diário Digital</h1>
-                    <p class="subtitle">Registre conteúdos e acompanhe as aulas por educador</p>
+            <!-- Header -->
+            <div class="header-section">
+                <div class="header-info">
+                    <h1 class="page-title">Diário Digital</h1>
+                    <p class="page-subtitle">Registre conteúdos e acompanhe as aulas por educador</p>
                 </div>
             </div>
 
@@ -37,7 +38,7 @@
                     <div class="icon">
                         <img src="/teacher.png" alt="Ícone de professor" class="icon-img" />
                     </div>
-                    <h2>Selecionar Educador</h2>
+                    <h2>Selecionar o Educador</h2>
                 </div>
                 
                 <div class="search-container">
@@ -245,6 +246,23 @@
     </div>
 </div>
 
+<!-- Modal de Confirmação de Salvamento -->
+@if (showSaveConfirmation)
+{
+    <div class="save-confirmation-overlay">
+        <div class="save-confirmation-modal">
+            <div class="confirmation-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4"></path>
+                    <circle cx="12" cy="12" r="10"></circle>
+                </svg>
+            </div>
+            <h3>Registro Salvo!</h3>
+            <p>O conteúdo da aula foi salvo com sucesso.</p>
+        </div>
+    </div>
+}
+
 @code {
     private List<Turma> turmas = new();
     private List<string> allEducators = new();
@@ -259,6 +277,7 @@
     private DateTime? selectedDate = null;
     private bool isSaving = false;
     private bool isInitialized = false;
+    private bool showSaveConfirmation = false;
     
     private DiaryRecord currentRecord = new();
     
@@ -471,6 +490,13 @@
             var recordData = $"{currentRecord.Content}|{currentRecord.Observations}";
             selectedDiario.Registros[selectedDate.Value] = recordData;
             
+            // Mostrar modal de confirmação
+            showSaveConfirmation = true;
+            StateHasChanged();
+            
+            // Esconder o modal após 2 segundos
+            await Task.Delay(2000);
+            showSaveConfirmation = false;
             StateHasChanged();
         }
         finally
@@ -493,7 +519,6 @@
                 Navigation?.NavigateTo("/turmas");
                 break;
             case ViewType.Diario:
-                // Já estamos na página de diário
                 break;
         }
     }

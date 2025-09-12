@@ -102,17 +102,17 @@
 }
 
 .stat-icon.blue {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    background: linear-gradient(135deg, #3b82f6);
     color: white;
 }
 
 .stat-icon.emerald {
-    background: linear-gradient(135deg, #10b981, #047857);
+    background: linear-gradient(135deg, #10b981);
     color: white;
 }
 
 .stat-icon.purple {
-    background: linear-gradient(135deg, #8b5cf6, #5b21b6);
+    background: linear-gradient(135deg, #8b5cf6);
     color: white;
 }
 
@@ -195,11 +195,11 @@
 }
 
 .chart-badge.blue {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    background: linear-gradient(135deg, #3b82f6);
 }
 
 .chart-badge.emerald {
-    background: linear-gradient(135deg, #10b981, #047857);
+    background: linear-gradient(135deg, #10b981);
 }
 
 .chart-series {
@@ -229,11 +229,11 @@
 }
 
 .chart-bar.blue {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    background: linear-gradient(135deg, #3b82f6);
 }
 
 .chart-bar.emerald {
-    background: linear-gradient(135deg, #10b981, #047857);
+    background: linear-gradient(135deg, #10b981);
 }
 
 .chart-value {

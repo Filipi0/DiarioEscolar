@@ -19,7 +19,6 @@
     margin: 0;
 }
 
-/* Primary Button */
 .primary-button {
     display: flex;
     align-items: center;
@@ -117,7 +116,7 @@
     justify-content: center;
     width: 2.25rem;
     height: 2.25rem;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    background: linear-gradient(135deg, #3b82f6);
     border-radius: 0.75rem;
     color: white;
     flex-shrink: 0;
@@ -135,7 +134,7 @@
 }
 
 .serie-badge {
-    background: linear-gradient(135deg, #10b981, #047857);
+    background: linear-gradient(135deg, #10b981);
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
