@@ -40,12 +40,22 @@
                             @foreach (var horario in selectedTurma.Horarios)
                             {
                                 <div class="item-card">
-                                    <div class="item-header">
-                                        <span class="day-badge">@diasSemana[horario.DiaSemana]</span>
-                                        <span class="time-text">@horario.HoraInicio - @horario.HoraFim</span>
+                                    <div class="item-content">
+                                        <div class="item-header">
+                                            <span class="day-badge">@diasSemana[horario.DiaSemana]</span>
+                                            <span class="time-text">@horario.HoraInicio - @horario.HoraFim</span>
+                                        </div>
+                                        <p class="item-title">@horario.Disciplina</p>
+                                        <p class="item-subtitle">@horario.Professor</p>
                                     </div>
-                                    <p class="item-title">@horario.Disciplina</p>
-                                    <p class="item-subtitle">@horario.Professor</p>
+                                    <div class="item-actions">
+                                        <button class="edit-button small" @onclick="() => EditHorario(horario.Id)" title="Editar horário">
+                                            @Icons.Edit
+                                        </button>
+                                        <button class="delete-button small" @onclick="() => DeleteHorario(horario.Id, horario.Disciplina)" title="Excluir horário">
+                                            @Icons.Trash
+                                        </button>
+                                    </div>
                                 </div>
                             }
                         }
@@ -66,8 +76,18 @@
                             @foreach (var diario in selectedTurma.Diarios)
                             {
                                 <div class="item-card">
-                                    <p class="item-title">@diario.Disciplina</p>
-                                    <p class="item-subtitle">@diario.ProfessorNome</p>
+                                    <div class="item-content">
+                                        <p class="item-title">@diario.Disciplina</p>
+                                        <p class="item-subtitle">@diario.ProfessorNome</p>
+                                    </div>
+                                    <div class="item-actions">
+                                        <button class="edit-button small" @onclick="() => EditDiario(diario.Id)" title="Editar diário">
+                                            @Icons.Edit
+                                        </button>
+                                        <button class="delete-button small" @onclick="() => DeleteDiario(diario.Id, diario.Disciplina)" title="Excluir diário">
+                                            @Icons.Trash
+                                        </button>
+                                    </div>
                                 </div>
                             }
                         }
@@ -89,7 +109,11 @@
                             @for (int i = 0; i < selectedTurma.Estudantes.Count; i++)
                             {
                                 var estudante = selectedTurma.Estudantes[i];
-                                <StudentCard Index="@(i + 1)" Name="@estudante.Nome" />
+                                <StudentCard Index="@(i + 1)" 
+                                           Name="@estudante.Nome" 
+                                           EstudanteId="@estudante.Id"
+                                           OnEdit="EditEstudante"
+                                           OnDelete="DeleteEstudante" />
                             }
                         }
                         else
@@ -150,10 +174,20 @@
                                         </div>
                                     </div>
                                     <div class="table-cell">
-                                        <button class="view-button" @onclick="() => SelectTurma(turma.Id)">
-                                            @Icons.Eye
-                                            <span>Ver Detalhes</span>
-                                        </button>
+                                        <div class="action-buttons">
+                                            <button class="view-button" @onclick="() => SelectTurma(turma.Id)">
+                                                @Icons.Eye
+                                                <span>Ver Detalhes</span>
+                                            </button>
+                                            <button class="edit-button" @onclick="() => EditTurma(turma)">
+                                                @Icons.Edit
+                                                <span>Editar</span>
+                                            </button>
+                                            <button class="delete-button" @onclick="() => ShowDeleteTurmaConfirmation(turma.Id, turma.Nome)">
+                                                @Icons.Trash
+                                                <span>Excluir</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             }
@@ -179,6 +213,7 @@
 
 <!-- Add Turma Modal Component -->
 <AddTurmaModal IsVisible="showAddTurmaModal" 
+               TurmaToEdit="turmaToEdit"
                OnClose="CloseAddTurmaModal" 
                OnTurmaAdded="HandleTurmaAdded" />
 
@@ -214,12 +249,46 @@
     </ModalForm>
 }
 
+<!-- Modal de Confirmação de Exclusão -->
+@if (showDeleteConfirmation)
+{
+    <div class="modal-overlay">
+        <div class="modal-content delete-modal">
+            <div class="modal-header">
+                <h3>Confirmar Exclusão</h3>
+                <button class="close-button" @onclick="CloseDeleteConfirmation">
+                    @Icons.X
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="delete-icon">
+                    @Icons.Trash
+                </div>
+                <p>Tem certeza que deseja excluir a @deleteItemType "<strong>@deleteItemName</strong>"?</p>
+                <p class="warning-text">Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-actions">
+                <button class="secondary-button" @onclick="CloseDeleteConfirmation">Cancelar</button>
+                <button class="delete-button" @onclick="ConfirmDelete">Excluir</button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<Turma> turmas = new();
     private Turma? selectedTurma = null;
     private bool showModal = false;
     private ModalType currentModal = ModalType.Horario;
     private bool showAddTurmaModal = false;
+    private bool showDeleteConfirmation = false;
+    private string deleteItemType = string.Empty;
+    private string deleteItemId = string.Empty;
+    private string deleteItemName = string.Empty;
+    private Turma? turmaToEdit = null;
+    private string estudanteEditandoId = string.Empty;
+    private string horarioEditandoId = string.Empty;
+    private string diarioEditandoId = string.Empty;
     
     // Form data
     private string nomeEstudante = string.Empty;
@@ -308,6 +377,9 @@
     private void CloseModal()
     {
         showModal = false;
+        estudanteEditandoId = string.Empty;
+        horarioEditandoId = string.Empty;
+        diarioEditandoId = string.Empty;
     }
 
     private void ShowAddTurmaModal()
@@ -318,6 +390,7 @@
     private void CloseAddTurmaModal()
     {
         showAddTurmaModal = false;
+        turmaToEdit = null;
     }
 
     private async Task HandleTurmaAdded()
@@ -352,18 +425,37 @@
     {
         if (selectedTurma != null && !string.IsNullOrEmpty(horario.DiaSemana))
         {
-            var novoHorarioObj = new Horario
+            if (!string.IsNullOrEmpty(horarioEditandoId))
             {
-                DiaSemana = int.Parse(horario.DiaSemana),
-                HoraInicio = horario.HoraInicio,
-                HoraFim = horario.HoraFim,
-                Disciplina = horario.Disciplina,
-                Professor = horario.Professor,
-                TurmaId = selectedTurma.Id
-            };
+                // Editando horário existente
+                var horarioExistente = selectedTurma.Horarios.FirstOrDefault(h => h.Id == horarioEditandoId);
+                if (horarioExistente != null)
+                {
+                    horarioExistente.DiaSemana = int.Parse(horario.DiaSemana);
+                    horarioExistente.HoraInicio = horario.HoraInicio;
+                    horarioExistente.HoraFim = horario.HoraFim;
+                    horarioExistente.Disciplina = horario.Disciplina;
+                    horarioExistente.Professor = horario.Professor;
+                    await UpdateSelectedTurma();
+                }
+                horarioEditandoId = string.Empty;
+            }
+            else
+            {
+                // Adicionando novo horário
+                var novoHorarioObj = new Horario
+                {
+                    DiaSemana = int.Parse(horario.DiaSemana),
+                    HoraInicio = horario.HoraInicio,
+                    HoraFim = horario.HoraFim,
+                    Disciplina = horario.Disciplina,
+                    Professor = horario.Professor,
+                    TurmaId = selectedTurma.Id
+                };
 
-            selectedTurma.Horarios.Add(novoHorarioObj);
-            await UpdateSelectedTurma();
+                selectedTurma.Horarios.Add(novoHorarioObj);
+                await UpdateSelectedTurma();
+            }
         }
     }
 
@@ -371,15 +463,31 @@
     {
         if (selectedTurma != null)
         {
-            var novoDiarioObj = new Diario
+            if (!string.IsNullOrEmpty(diarioEditandoId))
             {
-                ProfessorNome = diario.ProfessorNome,
-                Disciplina = diario.Disciplina,
-                TurmaId = selectedTurma.Id
-            };
+                // Editando diário existente
+                var diarioExistente = selectedTurma.Diarios.FirstOrDefault(d => d.Id == diarioEditandoId);
+                if (diarioExistente != null)
+                {
+                    diarioExistente.ProfessorNome = diario.ProfessorNome;
+                    diarioExistente.Disciplina = diario.Disciplina;
+                    await UpdateSelectedTurma();
+                }
+                diarioEditandoId = string.Empty;
+            }
+            else
+            {
+                // Adicionando novo diário
+                var novoDiarioObj = new Diario
+                {
+                    ProfessorNome = diario.ProfessorNome,
+                    Disciplina = diario.Disciplina,
+                    TurmaId = selectedTurma.Id
+                };
 
-            selectedTurma.Diarios.Add(novoDiarioObj);
-            await UpdateSelectedTurma();
+                selectedTurma.Diarios.Add(novoDiarioObj);
+                await UpdateSelectedTurma();
+            }
         }
     }
 
@@ -387,16 +495,32 @@
     {
         if (selectedTurma != null && !string.IsNullOrWhiteSpace(nome))
         {
-            var estudante = new Estudante
+            if (!string.IsNullOrEmpty(estudanteEditandoId))
             {
-                Nome = nome.Trim(),
-                TurmaId = selectedTurma.Id
-            };
+                // Editando estudante existente
+                var estudante = selectedTurma.Estudantes.FirstOrDefault(e => e.Id == estudanteEditandoId);
+                if (estudante != null)
+                {
+                    estudante.Nome = nome.Trim();
+                    selectedTurma.Estudantes = selectedTurma.Estudantes.OrderBy(e => e.Nome).ToList();
+                    await UpdateSelectedTurma();
+                }
+                estudanteEditandoId = string.Empty;
+            }
+            else
+            {
+                // Adicionando novo estudante
+                var estudante = new Estudante
+                {
+                    Nome = nome.Trim(),
+                    TurmaId = selectedTurma.Id
+                };
 
-            selectedTurma.Estudantes.Add(estudante);
-            selectedTurma.Estudantes = selectedTurma.Estudantes.OrderBy(e => e.Nome).ToList();
-            
-            await UpdateSelectedTurma();
+                selectedTurma.Estudantes.Add(estudante);
+                selectedTurma.Estudantes = selectedTurma.Estudantes.OrderBy(e => e.Nome).ToList();
+                
+                await UpdateSelectedTurma();
+            }
         }
     }
 
@@ -481,5 +605,151 @@
         }
         
         StateHasChanged();
+    }
+    
+    // Métodos para editar e excluir
+    private void EditTurma(Turma turma)
+    {
+        turmaToEdit = turma;
+        showAddTurmaModal = true;
+    }
+    
+    private void ShowDeleteTurmaConfirmation(string turmaId, string turmaNome)
+    {
+        deleteItemType = "turma";
+        deleteItemId = turmaId;
+        deleteItemName = turmaNome;
+        showDeleteConfirmation = true;
+    }
+    
+    private async Task ConfirmDelete()
+    {
+        if (deleteItemType == "turma")
+        {
+            await LocalStorage.DeleteTurmaAsync(deleteItemId);
+            await LoadTurmas();
+            
+            // Se a turma deletada era a selecionada, limpar seleção
+            if (selectedTurma?.Id == deleteItemId)
+            {
+                selectedTurma = null;
+            }
+        }
+        else if (deleteItemType == "estudante" && selectedTurma != null)
+        {
+            var estudante = selectedTurma.Estudantes.FirstOrDefault(e => e.Id == deleteItemId);
+            if (estudante != null)
+            {
+                selectedTurma.Estudantes.Remove(estudante);
+                await UpdateSelectedTurma();
+            }
+        }
+        else if (deleteItemType == "horário" && selectedTurma != null)
+        {
+            var horario = selectedTurma.Horarios.FirstOrDefault(h => h.Id == deleteItemId);
+            if (horario != null)
+            {
+                selectedTurma.Horarios.Remove(horario);
+                await UpdateSelectedTurma();
+            }
+        }
+        else if (deleteItemType == "diário" && selectedTurma != null)
+        {
+            var diario = selectedTurma.Diarios.FirstOrDefault(d => d.Id == deleteItemId);
+            if (diario != null)
+            {
+                selectedTurma.Diarios.Remove(diario);
+                await UpdateSelectedTurma();
+            }
+        }
+        
+        CloseDeleteConfirmation();
+    }
+    
+    private void CloseDeleteConfirmation()
+    {
+        showDeleteConfirmation = false;
+        deleteItemType = string.Empty;
+        deleteItemId = string.Empty;
+        deleteItemName = string.Empty;
+    }
+    
+    // Métodos para estudantes
+    private void EditEstudante(string estudanteId)
+    {
+        var estudante = selectedTurma?.Estudantes.FirstOrDefault(e => e.Id == estudanteId);
+        if (estudante != null)
+        {
+            nomeEstudante = estudante.Nome;
+            estudanteEditandoId = estudanteId;
+            currentModal = ModalType.Estudante;
+            showModal = true;
+        }
+    }
+    
+    private void DeleteEstudante(string estudanteId)
+    {
+        var estudante = selectedTurma?.Estudantes.FirstOrDefault(e => e.Id == estudanteId);
+        if (estudante != null)
+        {
+            deleteItemType = "estudante";
+            deleteItemId = estudanteId;
+            deleteItemName = estudante.Nome;
+            showDeleteConfirmation = true;
+        }
+    }
+    
+    // Métodos para horários
+    private void EditHorario(string horarioId)
+    {
+        var horario = selectedTurma?.Horarios.FirstOrDefault(h => h.Id == horarioId);
+        if (horario != null)
+        {
+            novoHorario = new NovoHorarioDto
+            {
+                DiaSemana = horario.DiaSemana.ToString(),
+                HoraInicio = horario.HoraInicio,
+                HoraFim = horario.HoraFim,
+                Disciplina = horario.Disciplina,
+                Professor = horario.Professor
+            };
+            horarioEditandoId = horarioId;
+            currentModal = ModalType.Horario;
+            showModal = true;
+            LoadProfessoresSugestoes();
+        }
+    }
+    
+    private void DeleteHorario(string horarioId, string disciplina)
+    {
+        deleteItemType = "horário";
+        deleteItemId = horarioId;
+        deleteItemName = disciplina;
+        showDeleteConfirmation = true;
+    }
+    
+    // Métodos para diários
+    private void EditDiario(string diarioId)
+    {
+        var diario = selectedTurma?.Diarios.FirstOrDefault(d => d.Id == diarioId);
+        if (diario != null)
+        {
+            novoDiario = new NovoDiarioDto
+            {
+                ProfessorNome = diario.ProfessorNome,
+                Disciplina = diario.Disciplina
+            };
+            diarioEditandoId = diarioId;
+            currentModal = ModalType.Diario;
+            showModal = true;
+        }
+    }
+    
+    private void DeleteDiario(string diarioId, string disciplina)
+    {
+        deleteItemType = "diário";
+        deleteItemId = diarioId;
+        deleteItemName = disciplina;
+        showDeleteConfirmation = true;
     }
 }

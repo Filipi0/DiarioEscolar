@@ -1,9 +1,34 @@
+@using DiarioEscolar.Services
+
 <div class="student-card">
-    <div class="student-number">@Index</div>
-    <span class="student-name">@Name</span>
+    <div class="student-info">
+        <div class="student-number">@Index</div>
+        <span class="student-name">@Name</span>
+    </div>
+    <div class="student-actions">
+        <button class="edit-button small" @onclick="HandleEdit" title="Editar estudante">
+            @Icons.Edit
+        </button>
+        <button class="delete-button small" @onclick="HandleDelete" title="Excluir estudante">
+            @Icons.Trash
+        </button>
+    </div>
 </div>
 
 @code {
     [Parameter] public int Index { get; set; }
     [Parameter] public string Name { get; set; } = string.Empty;
+    [Parameter] public string EstudanteId { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> OnEdit { get; set; }
+    [Parameter] public EventCallback<string> OnDelete { get; set; }
+    
+    private async Task HandleEdit()
+    {
+        await OnEdit.InvokeAsync(EstudanteId);
+    }
+    
+    private async Task HandleDelete()
+    {
+        await OnDelete.InvokeAsync(EstudanteId);
+    }
 }

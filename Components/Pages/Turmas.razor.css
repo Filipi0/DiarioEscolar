@@ -244,6 +244,119 @@
     height: 1rem;
 }
 
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.edit-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #059669;
+    background: rgba(5, 150, 105, 0.1);
+    border: 1px solid rgba(5, 150, 105, 0.2);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.edit-button:hover {
+    color: #047857;
+    background: rgba(5, 150, 105, 0.15);
+    border-color: rgba(5, 150, 105, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.2);
+}
+
+.edit-button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(5, 150, 105, 0.2);
+}
+
+.edit-button svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.delete-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #dc2626;
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.delete-button:hover {
+    color: #b91c1c;
+    background: rgba(220, 38, 38, 0.15);
+    border-color: rgba(220, 38, 38, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+.delete-button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(220, 38, 38, 0.2);
+}
+
+.delete-button svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Delete Confirmation Modal */
+.delete-modal {
+    max-width: 400px;
+    width: 90%;
+}
+
+.delete-modal .modal-body {
+    text-align: center;
+    padding: 2rem;
+}
+
+.delete-icon {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1.5rem auto;
+    color: #dc2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(220, 38, 38, 0.1);
+    border-radius: 50%;
+}
+
+.delete-icon svg {
+    width: 2rem;
+    height: 2rem;
+}
+
+.delete-modal p {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.warning-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
 /* Empty State */
 .empty-table {
     display: flex;
@@ -393,14 +506,39 @@
 }
 
 .item-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     background: var(--bg-secondary);
     border-radius: 0.5rem;
     padding: 0.75rem;
     margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.item-card:hover {
+    background: var(--border-light);
+    transform: translateY(-1px);
 }
 
 .item-card:last-child {
     margin-bottom: 0;
+}
+
+.item-content {
+    flex: 1;
+}
+
+.item-actions {
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    margin-left: 0.5rem;
+}
+
+.item-card:hover .item-actions {
+    opacity: 1;
 }
 
 .item-header {

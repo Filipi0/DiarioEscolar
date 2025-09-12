@@ -1,7 +1,7 @@
 .student-card {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: space-between;
     background: var(--bg-secondary);
     border-radius: 0.5rem;
     padding: 0.75rem;
@@ -16,6 +16,13 @@
 .student-card:hover {
     background: var(--border-light);
     transform: translateY(-1px);
+}
+
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
 }
 
 .student-number {
@@ -36,4 +43,35 @@
     font-weight: 500;
     color: var(--text-primary);
     font-size: 0.875rem;
+}
+
+.student-actions {
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.student-card:hover .student-actions {
+    opacity: 1;
+}
+
+.edit-button.small,
+.delete-button.small {
+    padding: 0.375rem;
+    min-width: auto;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
+}
+
+.edit-button.small span,
+.delete-button.small span {
+    display: none;
+}
+
+.edit-button.small svg,
+.delete-button.small svg {
+    width: 0.875rem;
+    height: 0.875rem;
 }

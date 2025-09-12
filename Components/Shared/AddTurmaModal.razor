@@ -7,7 +7,7 @@
     <div class="modal-overlay" @onclick="CloseModal">
         <div class="modal-content" @onclick:stopPropagation="true">
             <div class="modal-header">
-                <h2 class="modal-title">Nova Turma</h2>
+                <h2 class="modal-title">@(TurmaToEdit != null ? "Editar Turma" : "Nova Turma")</h2>
                 <button class="close-button" @onclick="CloseModal">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="m18 6-12 12M6 6l12 12"/>
@@ -38,7 +38,7 @@
                     </div>
                     <div class="modal-actions">
                         <button type="button" class="secondary-button" @onclick="CloseModal">Cancelar</button>
-                        <button type="submit" class="primary-button">Criar Turma</button>
+                        <button type="submit" class="primary-button">@(TurmaToEdit != null ? "Salvar Alterações" : "Criar Turma")</button>
                     </div>
                 </form>
             </div>
@@ -50,21 +50,47 @@
     [Parameter] public bool IsVisible { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback OnTurmaAdded { get; set; }
+    [Parameter] public Turma? TurmaToEdit { get; set; }
 
     private string nomeTurma = string.Empty;
     private string serieTurma = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        if (TurmaToEdit != null)
+        {
+            nomeTurma = TurmaToEdit.Nome;
+            serieTurma = TurmaToEdit.Serie;
+        }
+        else
+        {
+            nomeTurma = string.Empty;
+            serieTurma = string.Empty;
+        }
+    }
 
     private async Task HandleSubmit()
     {
         if (!string.IsNullOrWhiteSpace(nomeTurma) && !string.IsNullOrWhiteSpace(serieTurma))
         {
-            var novaTurma = new Turma
+            if (TurmaToEdit != null)
             {
-                Nome = nomeTurma.Trim(),
-                Serie = serieTurma.Trim()
-            };
+                // Editando turma existente
+                TurmaToEdit.Nome = nomeTurma.Trim();
+                TurmaToEdit.Serie = serieTurma.Trim();
+                await LocalStorage.UpdateTurmaAsync(TurmaToEdit);
+            }
+            else
+            {
+                // Criando nova turma
+                var novaTurma = new Turma
+                {
+                    Nome = nomeTurma.Trim(),
+                    Serie = serieTurma.Trim()
+                };
+                await LocalStorage.AddTurmaAsync(novaTurma);
+            }
 
-            await LocalStorage.AddTurmaAsync(novaTurma);
             await OnTurmaAdded.InvokeAsync();
             await CloseModal();
         }
