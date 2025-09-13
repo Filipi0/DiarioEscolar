@@ -3,17 +3,15 @@
 @if (IsVisible)
 {
     <div class="modal-overlay">
-        <div class="modal-content delete-modal">
-            <div class="modal-header">
-                <h3>@Title</h3>
-                <button class="close-button" @onclick="OnCancel">
-                    @Icons.X
-                </button>
-            </div>
+        <div class="modal-content">
+            <button class="close-button" @onclick="OnCancel" title="Fechar">
+                @Icons.X
+            </button>
             <div class="modal-body">
                 <div class="delete-icon">
                     @IconSvg
                 </div>
+                <h3>@Title</h3>
                 <p>@Message</p>
                 @if (!string.IsNullOrEmpty(WarningText))
                 {
