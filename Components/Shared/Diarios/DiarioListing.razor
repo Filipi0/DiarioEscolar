@@ -1,0 +1,70 @@
+@using DiarioEscolar.Models
+@using DiarioEscolar.Components.Shared
+
+<div class="diarios-section">
+    <div class="section-header">
+        <div class="educator-info">
+            <div class="educator-name">@EducatorName</div>
+            <button class="back-button" @onclick="OnBack">← Voltar</button>
+        </div>
+    </div>
+
+    <div class="section-title">
+        <div class="icon">
+            <img src="/book.png" alt="Ícone de diários" class="icon-img" />
+        </div>
+        <h2>Diários</h2>
+    </div>
+
+    @if (Diarios.Any())
+    {
+        <div class="diarios-grid">
+            @foreach (var diario in Diarios)
+            {
+                <div class="diario-card" @onclick="() => OnSelectDiario.InvokeAsync(diario)">
+                    <div class="diario-header">
+                        <div class="diario-title">@GetTurmaName(diario.TurmaId)</div>
+                        <div class="diario-badge">@GetSerie(diario.TurmaId)</div>
+                    </div>
+                    <div class="diario-subject">@diario.Disciplina</div>
+                    <div class="diario-info">
+                        <div class="student-count">
+                            👥 @GetStudentCount(diario.TurmaId) estudantes
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📖</div>
+            <h3>Nenhum diário encontrado</h3>
+            <p>Este educador ainda não possui diários cadastrados.</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string EducatorName { get; set; } = string.Empty;
+    [Parameter] public List<Diario> Diarios { get; set; } = new();
+    [Parameter] public List<Turma> Turmas { get; set; } = new();
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public EventCallback<Diario> OnSelectDiario { get; set; }
+
+    private string GetTurmaName(string turmaId)
+    {
+        return Turmas.FirstOrDefault(t => t.Id == turmaId)?.Nome ?? "Turma";
+    }
+
+    private string GetSerie(string turmaId)
+    {
+        return Turmas.FirstOrDefault(t => t.Id == turmaId)?.Serie ?? "";
+    }
+
+    private int GetStudentCount(string turmaId)
+    {
+        return Turmas.FirstOrDefault(t => t.Id == turmaId)?.Estudantes.Count ?? 0;
+    }
+}

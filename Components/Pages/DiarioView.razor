@@ -1,7 +1,7 @@
 @page "/diario"
 @using DiarioEscolar.Models
 @using DiarioEscolar.Services
-@using DiarioEscolar.Components.Shared
+@using DiarioEscolar.Components.Shared.Diarios
 @inject LocalStorageService LocalStorage
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
@@ -74,174 +74,22 @@
         }
         else if (selectedDiario == null)
         {
-            <!-- Segunda Tela: Lista de Diários do Educador -->
-            <div class="diarios-section">
-                <div class="section-header">
-                    <div class="educator-info">
-                        <div class="educator-name">@selectedEducator</div>
-                        <button class="back-button" @onclick="ClearSelection">← Voltar</button>
-                    </div>
-                </div>
-
-                <div class="section-title">
-                    <div class="icon">
-                        <img src="/book.png" alt="Ícone de diários" class="icon-img" />
-                    </div>
-                    <h2>Diários</h2>
-                </div>
-
-                @if (educatorDiarios.Any())
-                {
-                    <div class="diarios-grid">
-                        @foreach (var diario in educatorDiarios)
-                        {
-                            <div class="diario-card" @onclick="() => SelectDiario(diario)">
-                                <div class="diario-header">
-                                    <div class="diario-title">@GetTurmaName(diario.TurmaId)</div>
-                                    <div class="diario-badge">@GetSerie(diario.TurmaId)</div>
-                                </div>
-                                <div class="diario-subject">@diario.Disciplina</div>
-                                <div class="diario-info">
-                                    <div class="student-count">
-                                        👥 @GetStudentCount(diario.TurmaId) estudantes
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="empty-state">
-                        <div class="empty-icon">📖</div>
-                        <h3>Nenhum diário encontrado</h3>
-                        <p>Este educador ainda não possui diários cadastrados.</p>
-                    </div>
-                }
-            </div>
+            <DiarioListing
+                EducatorName="@selectedEducator"
+                Diarios="educatorDiarios"
+                Turmas="turmas"
+                OnBack="ClearSelection"
+                OnSelectDiario="SelectDiario" />
         }
         else
         {
-            <!-- Terceira Tela: Detalhamento do Diário com Calendário -->
-            <div class="diario-detail">
-                <div class="detail-header">
-                    <div class="breadcrumb">
-                        <span @onclick="ClearSelection" class="breadcrumb-link">@selectedEducator</span>
-                        <span class="breadcrumb-separator">></span>
-                        <span @onclick="() => selectedDiario = null" class="breadcrumb-link">Diários</span>
-                        <span class="breadcrumb-separator">></span>
-                        <span class="breadcrumb-current">@GetTurmaName(selectedDiario.TurmaId) - @selectedDiario.Disciplina</span>
-                    </div>
-                </div>
-
-                <div class="detail-content">
-                    <div class="calendar-section">
-                        <div class="calendar-header">
-                            <div class="calendar-title">
-                                <div class="icon">
-                                    <img src="/classe.png" alt="Ícone de calendário" class="icon-img" />
-                                </div>
-                                <h3>@GetTurmaName(selectedDiario.TurmaId) - @selectedDiario.Disciplina</h3>
-                            </div>
-                            <div class="calendar-navigation">
-                                <button @onclick="PreviousMonth" class="nav-button">‹</button>
-                                <span class="current-month">@currentMonth.ToString("MMMM yyyy")</span>
-                                <button @onclick="NextMonth" class="nav-button">›</button>
-                            </div>
-                        </div>
-
-                        <div class="calendar">
-                            <div class="calendar-weekdays">
-                                <div class="weekday">Dom</div>
-                                <div class="weekday">Seg</div>
-                                <div class="weekday">Ter</div>
-                                <div class="weekday">Qua</div>
-                                <div class="weekday">Qui</div>
-                                <div class="weekday">Sex</div>
-                                <div class="weekday">Sáb</div>
-                            </div>
-                            <div class="calendar-days">
-                                @foreach (var day in GetCalendarDays())
-                                {
-                                    <div class="calendar-day @GetDayClass(day)" @onclick="() => SelectDate(day)">
-                                        @if (day.Date.Month == currentMonth.Month)
-                                        {
-                                            <span class="day-number">@day.Date.Day</span>
-                                            @if (HasClassOnDay(day.Date))
-                                            {
-                                                <div class="day-indicator @(HasRecord(day.Date) ? "has-record" : "")"></div>
-                                            }
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        </div>
-
-                        <div class="calendar-legend">
-                            <div class="legend-item"> 
-                                <div class="legend-color day-with-class"></div>
-                                <span>Dia de aula</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color has-record"></div>
-                                <span>Com registro</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color selected"></div>
-                                <span>Selecionado</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    @if (!selectedDate.HasValue)
-                    {
-                        <div class="register-section">
-                            <div class="register-header">
-                                <h3>Selecione uma Data</h3>
-                                <p>Clique em um dia com aula no calendário para registrar ou visualizar conteúdos</p>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="register-section">
-                            <div class="register-header with-actions">
-                                <div>
-                                    <h3>Registro - @selectedDate?.ToString("dd/MM/yyyy")</h3>
-                                </div>
-                                <div class="register-actions">
-                                    <button @onclick="SaveRecord" class="save-button" disabled="@isSaving">
-                                        @if (isSaving)
-                                        {
-                                            <span>Salvando...</span>
-                                        }
-                                        else
-                                        {
-                                            <span>Salvar</span>
-                                        }
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="register-form">
-                                <div class="form-group">
-                                    <label>Conteúdo da Aula</label>
-                                    <textarea @bind="currentRecord.Content" 
-                                              placeholder="Descreva o conteúdo abordado na aula..."
-                                              class="content-textarea"></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Observações</label>
-                                    <textarea @bind="currentRecord.Observations" 
-                                              placeholder="Adicione observações sobre a aula, comportamento dos alunos, etc."
-                                              class="observations-textarea"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
+            <DiarioDetail
+                SelectedEducator="@selectedEducator"
+                SelectedDiario="selectedDiario"
+                Turmas="turmas"
+                OnBackToDiarios="() => selectedDiario = null"
+                OnBackToEducators="ClearSelection"
+                OnSaveRecord="SaveRecord" />
         }
     </div>
 </div>
@@ -273,19 +121,8 @@
     private string selectedEducator = "";
     private Diario? selectedDiario = null;
     
-    private DateTime currentMonth = DateTime.Now;
-    private DateTime? selectedDate = null;
-    private bool isSaving = false;
     private bool isInitialized = false;
     private bool showSaveConfirmation = false;
-    
-    private DiaryRecord currentRecord = new();
-    
-    public class DiaryRecord
-    {
-        public string Content { get; set; } = "";
-        public string Observations { get; set; } = "";
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -341,8 +178,6 @@
     private void SelectDiario(Diario diario)
     {
         selectedDiario = diario;
-        selectedDate = null;
-        currentRecord = new DiaryRecord();
     }
 
     private void ClearSelection()
@@ -350,128 +185,13 @@
         selectedEducator = "";
         searchTerm = "";
         selectedDiario = null;
-        selectedDate = null;
         educatorDiarios = new List<Diario>();
         filteredEducators = new List<string>();
     }
 
-    private string GetTurmaName(string turmaId)
+    private async Task SaveRecord((DiarioDetail.DiaryRecord record, DateTime date) data)
     {
-        return turmas.FirstOrDefault(t => t.Id == turmaId)?.Nome ?? "Turma";
-    }
-
-    private string GetSerie(string turmaId)
-    {
-        return turmas.FirstOrDefault(t => t.Id == turmaId)?.Serie ?? "";
-    }
-
-    private int GetStudentCount(string turmaId)
-    {
-        return turmas.FirstOrDefault(t => t.Id == turmaId)?.Estudantes.Count ?? 0;
-    }
-
-    private void PreviousMonth()
-    {
-        currentMonth = currentMonth.AddMonths(-1);
-        selectedDate = null;
-    }
-
-    private void NextMonth()
-    {
-        currentMonth = currentMonth.AddMonths(1);
-        selectedDate = null;
-    }
-
-    private List<DateTime> GetCalendarDays()
-    {
-        var firstDay = new DateTime(currentMonth.Year, currentMonth.Month, 1);
-        var lastDay = firstDay.AddMonths(1).AddDays(-1);
-        
-        var startDate = firstDay.AddDays(-(int)firstDay.DayOfWeek);
-        var endDate = lastDay.AddDays(6 - (int)lastDay.DayOfWeek);
-        
-        var days = new List<DateTime>();
-        for (var date = startDate; date <= endDate; date = date.AddDays(1))
-        {
-            days.Add(date);
-        }
-        
-        return days;
-    }
-
-    private string GetDayClass(DateTime day)
-    {
-        var classes = new List<string>();
-        
-        if (day.Date.Month != currentMonth.Month)
-            classes.Add("other-month");
-        
-        if (!HasClassOnDay(day.Date))
-            classes.Add("disabled");
-        else
-            classes.Add("day-with-class");
-        
-        if (HasRecord(day.Date))
-            classes.Add("has-record");
-        
-        if (selectedDate.HasValue && selectedDate.Value.Date == day.Date)
-            classes.Add("selected");
-        
-        return string.Join(" ", classes);
-    }
-
-    private bool HasClassOnDay(DateTime date)
-    {
-        if (selectedDiario == null) return false;
-        
-        var turma = turmas.FirstOrDefault(t => t.Id == selectedDiario.TurmaId);
-        if (turma == null) return false;
-        
-        var dayOfWeek = (int)date.DayOfWeek;
-        return turma.Horarios.Any(h => 
-            h.Professor == selectedDiario.ProfessorNome && 
-            h.Disciplina == selectedDiario.Disciplina && 
-            h.DiaSemana == dayOfWeek);
-    }
-
-    private bool HasRecord(DateTime date)
-    {
-        return selectedDiario?.Registros.ContainsKey(date.Date) == true;
-    }
-
-    private void SelectDate(DateTime date)
-    {
-        if (!HasClassOnDay(date.Date) || date.Month != currentMonth.Month) return;
-        
-        selectedDate = date.Date;
-        LoadRecord();
-    }
-
-    private async void LoadRecord()
-    {
-        if (selectedDate.HasValue && selectedDiario != null)
-        {
-            var (conteudo, observacoes) = await LocalStorage.GetDiarioRecordAsync(
-                selectedDiario.TurmaId, 
-                selectedDiario.ProfessorNome, 
-                selectedDiario.Disciplina, 
-                selectedDate.Value);
-            
-            currentRecord.Content = conteudo;
-            currentRecord.Observations = observacoes;
-            StateHasChanged();
-        }
-        else
-        {
-            currentRecord = new DiaryRecord();
-        }
-    }
-
-    private async Task SaveRecord()
-    {
-        if (!selectedDate.HasValue || selectedDiario == null) return;
-        
-        isSaving = true;
+        if (selectedDiario == null) return;
         
         try
         {
@@ -479,16 +199,16 @@
                 selectedDiario.TurmaId,
                 selectedDiario.ProfessorNome,
                 selectedDiario.Disciplina,
-                selectedDate.Value,
-                currentRecord.Content,
-                currentRecord.Observations);
+                data.date,
+                data.record.Content,
+                data.record.Observations);
             
             // Atualizar o diário local para refletir a mudança
             if (selectedDiario.Registros == null)
                 selectedDiario.Registros = new Dictionary<DateTime, string>();
             
-            var recordData = $"{currentRecord.Content}|{currentRecord.Observations}";
-            selectedDiario.Registros[selectedDate.Value] = recordData;
+            var recordData = $"{data.record.Content}|{data.record.Observations}";
+            selectedDiario.Registros[data.date] = recordData;
             
             // Mostrar modal de confirmação
             showSaveConfirmation = true;
@@ -499,9 +219,10 @@
             showSaveConfirmation = false;
             StateHasChanged();
         }
-        finally
+        catch (Exception ex)
         {
-            isSaving = false;
+            // Em uma aplicação real, logar o erro
+            Console.WriteLine($"Erro ao salvar registro: {ex.Message}");
         }
     }
 
