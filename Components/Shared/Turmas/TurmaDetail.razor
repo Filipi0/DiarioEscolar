@@ -1,6 +1,5 @@
 @using DiarioEscolar.Models
 @using DiarioEscolar.Services
-@using DiarioEscolar.Components.Shared
 @using DiarioEscolar.Dtos
 
 <!-- Detalhes da Turma -->
@@ -38,10 +37,10 @@
                         </div>
                         <div class="item-actions">
                             <button class="edit-btn small" @onclick="() => OnEditHorario.InvokeAsync(horario.Id)" title="Editar horário">
-                                <img src="pencil.png" alt="Editar" />
+                                <img src="/pencil.png" alt="Editar" />
                             </button>
                             <button class="delete-btn small" @onclick="() => OnDeleteHorario.InvokeAsync((horario.Id, horario.Disciplina))" title="Excluir horário">
-                                <img src="trash.png" alt="Excluir" />
+                                <img src="/trash.png" alt="Excluir" />
                             </button>
                         </div>
                     </div>
@@ -70,10 +69,10 @@
                         </div>
                         <div class="item-actions">
                             <button class="edit-btn small" @onclick="() => OnEditDiario.InvokeAsync(diario.Id)" title="Editar diário">
-                                <img src="pencil.png" alt="Editar" />
+                                <img src="/pencil.png" alt="Editar" />
                             </button>
                             <button class="delete-btn small" @onclick="() => OnDeleteDiario.InvokeAsync((diario.Id, diario.Disciplina))" title="Excluir diário">
-                                <img src="trash.png" alt="Excluir" />
+                                <img src="/trash.png" alt="Excluir" />
                             </button>
                         </div>
                     </div>
