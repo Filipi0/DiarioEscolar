@@ -33,11 +33,15 @@ export async function renderPieChart(canvasId, title, labels, data) {
     }
 
     const backgroundColors = [
-        'rgba(59, 130, 246, 0.8)', // blue
-        'rgba(16, 185, 129, 0.8)', // emerald
-        'rgba(139, 92, 246, 0.8)', // purple
-        'rgba(244, 63, 94, 0.8)',  // red
-        'rgba(251, 191, 36, 0.8)'  // yellow
+        'rgba(59, 130, 246, 0.8)',
+        'rgba(16, 185, 129, 0.8)',
+        'rgba(139, 92, 246, 0.8)', 
+        'rgba(244, 63, 94, 0.8)', 
+        'rgba(251, 191, 36, 0.8)',
+        'rgba(34, 197, 94, 0.8)', 
+        'rgba(75, 85, 99, 0.8)',
+        'rgba(156, 163, 175, 0.8)', 
+        'rgba(54, 23, 105, 0.8)'
     ];
     
     // Adiciona cores de borda com base nas cores de fundo
