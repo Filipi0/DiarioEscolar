@@ -322,3 +322,24 @@
     --border-color: #334155;
     --border-light: #475569;
 }
+
+/* Pie Chart Styles */
+.pie-chart-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    padding: 0.1rem;
+}
+
+.pie-chart-wrapper .pie-chart-container {
+    width: 100%;
+    max-width: 350px;
+    height: 300px;
+    position: relative;
+}
+
+.pie-chart-wrapper canvas {
+    max-width: 100%;
+    max-height: 100%;
+}

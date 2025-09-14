@@ -111,24 +111,13 @@
                         <h2 class="chart-title">Estudantes por Série</h2>
                     </div>
                     
-                    <div class="chart-content">
+                    <div class="chart-content pie-chart-wrapper">
                         @if (estudantesPorSerie.Any())
                         {
-                            @foreach (var item in estudantesPorSerie)
-                            {
-                                <div class="chart-item">
-                                    <div class="chart-item-label">
-                                        <div class="chart-badge emerald">@item.Key.Substring(0, 1)</div>
-                                        <span class="chart-series">@item.Key</span>
-                                    </div>
-                                    <div class="chart-bar-container">
-                                        <div class="chart-bar-bg">
-                                            <div class="chart-bar emerald" style="width: @(GetPercentage(item.Value, estudantesPorSerie.Values.Max()))%"></div>
-                                        </div>
-                                        <span class="chart-value">@item.Value</span>
-                                    </div>
-                                </div>
-                            }
+                            <PieChart 
+                                CanvasId="estudantes-por-serie-chart" 
+                                Title="Distribuição de Estudantes por Série"
+                                Data="estudantesPorSerie" />
                         }
                         else
                         {

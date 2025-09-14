@@ -1,0 +1,39 @@
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+<div class="pie-chart-container">
+    <canvas id="@CanvasId"></canvas>
+</div>
+
+@code {
+    [Parameter] public string CanvasId { get; set; } = $"pie-chart-{Guid.NewGuid()}";
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public Dictionary<string, int> Data { get; set; } = new();
+    
+    private IJSObjectReference? module;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Data.Any())
+        {
+            try
+            {
+                module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/chart-renderer.js");
+                await module.InvokeVoidAsync("renderPieChart", CanvasId, Title, Data.Keys.ToList(), Data.Values.ToList());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao renderizar gráfico: {ex.Message}");
+            }
+        }
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (module is not null)
+        {
+            await module.DisposeAsync();
+        }
+    }
+}
