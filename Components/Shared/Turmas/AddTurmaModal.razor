@@ -1,6 +1,6 @@
 @using DiarioEscolar.Models
 @using DiarioEscolar.Services
-@inject LocalStorageService LocalStorage
+@inject TurmasService TurmasService
 
 @if (IsVisible)
 {
@@ -78,7 +78,7 @@
                 // Editando turma existente
                 TurmaToEdit.Nome = nomeTurma.Trim();
                 TurmaToEdit.Serie = serieTurma.Trim();
-                await LocalStorage.UpdateTurmaAsync(TurmaToEdit);
+                await TurmasService.UpdateTurmaAsync(TurmaToEdit);
             }
             else
             {
@@ -88,7 +88,7 @@
                     Nome = nomeTurma.Trim(),
                     Serie = serieTurma.Trim()
                 };
-                await LocalStorage.AddTurmaAsync(novaTurma);
+                await TurmasService.AddTurmaAsync(novaTurma);
             }
 
             await OnTurmaAdded.InvokeAsync();

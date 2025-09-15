@@ -1,10 +1,11 @@
 @page "/diario"
 @using DiarioEscolar.Models
 @using DiarioEscolar.Services
+@using DiarioEscolar.Dtos
 @using DiarioEscolar.Components.Shared.Diarios
 @using DiarioEscolar.Components.Layout
-@inject LocalStorageService LocalStorage
-@inject IJSRuntime JSRuntime
+@inject DiarioService DiarioService
+@inject TurmasService TurmasService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
@@ -140,8 +141,9 @@
 
     private async Task LoadData()
     {
-        turmas = await LocalStorage.GetTurmasAsync();
-        allEducators = await LocalStorage.GetEducadoresAsync();
+        turmas = await TurmasService.GetTurmasAsync();
+        var (educadores, _) = await DiarioService.GetAllDiariosWithEducatorsAsync();
+        allEducators = educadores;
     }
 
     private void OnSearchInputChanged(ChangeEventArgs e)
@@ -150,19 +152,14 @@
         FilterEducators();
     }
 
-    private void FilterEducators()
+    private async void FilterEducators()
     {
-        if (string.IsNullOrEmpty(searchTerm))
+        filteredEducators = await DiarioService.FilterEducatorsAsync(searchTerm);
+        if (!string.IsNullOrEmpty(searchTerm))
         {
-            filteredEducators = new List<string>();
+            filteredEducators = filteredEducators.Take(5).ToList();
         }
-        else
-        {
-            filteredEducators = allEducators
-                .Where(e => e.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                .Take(5)
-                .ToList();
-        }
+        StateHasChanged();
     }
 
     private void SelectEducator(string educator)
@@ -175,7 +172,7 @@
 
     private async void LoadEducatorDiarios()
     {
-        educatorDiarios = await LocalStorage.GetDiariosByEducadorAsync(selectedEducator);
+        educatorDiarios = await DiarioService.GetDiariosByEducatorAsync(selectedEducator);
         StateHasChanged();
     }
 
@@ -187,10 +184,10 @@
     private void ClearSelection()
     {
         selectedEducator = "";
-        searchTerm = "";
         selectedDiario = null;
-        educatorDiarios = new List<Diario>();
-        filteredEducators = new List<string>();
+        searchTerm = "";
+        filteredEducators.Clear();
+        educatorDiarios.Clear();
     }
 
     private async Task SaveRecord((DiarioDetail.DiaryRecord record, DateTime date) data)
@@ -199,20 +196,23 @@
         
         try
         {
-            await LocalStorage.SaveDiarioRecordAsync(
-                selectedDiario.TurmaId,
-                selectedDiario.ProfessorNome,
-                selectedDiario.Disciplina,
-                data.date,
-                data.record.Content,
-                data.record.Observations);
+            // Crie um DTO com os dados do registro
+            var recordDto = new DiaryRecordDto
+            {
+                Date = data.date,
+                Content = data.record.Content,
+                Observations = data.record.Observations
+            };
+
+            // Chame o método do novo serviço com o DTO
+            await DiarioService.SaveDiarioRecordAsync(selectedDiario.Id, recordDto);
             
             // Atualizar o diário local para refletir a mudança
             if (selectedDiario.Registros == null)
                 selectedDiario.Registros = new Dictionary<DateTime, string>();
             
             var recordData = $"{data.record.Content}|{data.record.Observations}";
-            selectedDiario.Registros[data.date] = recordData;
+            selectedDiario.Registros[data.date.Date] = recordData;
             
             // Mostrar modal de confirmação
             showSaveConfirmation = true;
@@ -231,25 +231,37 @@
     }
 
     // Métodos para gerenciamento de estudantes no diário
-    private void HandleAddStudent((string StudentName, string TurmaId) data)
+    private async Task HandleAddStudent((string StudentName, string TurmaId) data)
     {
-        // Aqui implementaríamos a abertura do modal de adicionar estudante
-        // Por enquanto, vamos redirecionar para a página de turmas onde já existe a funcionalidade
-        Navigation?.NavigateTo($"/turmas");
+        if (selectedDiario != null)
+        {
+            await DiarioService.AddEstudanteToTurmaAsync(selectedDiario.TurmaId, data.StudentName);
+            // Recarregar dados da turma
+            turmas = await TurmasService.GetTurmasAsync();
+            StateHasChanged();
+        }
     }
     
-    private void HandleEditStudent((string StudentId, string StudentName) data)
+    private async Task HandleEditStudent((string StudentId, string StudentName) data)
     {
-        // Aqui implementaríamos a abertura do modal de editar estudante
-        // Por enquanto, vamos redirecionar para a página de turmas onde já existe a funcionalidade
-        Navigation?.NavigateTo($"/turmas");
+        if (selectedDiario != null)
+        {
+            await DiarioService.UpdateEstudanteInTurmaAsync(selectedDiario.TurmaId, data.StudentId, data.StudentName);
+            // Recarregar dados da turma
+            turmas = await TurmasService.GetTurmasAsync();
+            StateHasChanged();
+        }
     }
     
-    private void HandleDeleteStudent((string StudentId, string StudentName) data)
+    private async Task HandleDeleteStudent((string StudentId, string StudentName) data)
     {
-        // Aqui implementaríamos a confirmação e exclusão do estudante
-        // Por enquanto, vamos redirecionar para a página de turmas onde já existe a funcionalidade
-        Navigation?.NavigateTo($"/turmas");
+        if (selectedDiario != null)
+        {
+            await DiarioService.DeleteEstudanteFromTurmaAsync(selectedDiario.TurmaId, data.StudentId);
+            // Recarregar dados da turma
+            turmas = await TurmasService.GetTurmasAsync();
+            StateHasChanged();
+        }
     }
 
     private void HandleViewChange(ViewType view)

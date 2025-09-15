@@ -13,7 +13,6 @@ public class LocalStorageService
         _jsRuntime = jsRuntime;
     }
 
-    // Métodos para Turmas
     public async Task<List<Turma>> GetTurmasAsync()
     {
         try
@@ -23,7 +22,6 @@ public class LocalStorageService
         }
         catch (JsonException)
         {
-            // Se houver erro de deserialização, limpa os dados antigos e retorna lista vazia
             await ClearAllDataAsync();
             return new List<Turma>();
         }
@@ -33,13 +31,6 @@ public class LocalStorageService
     {
         var json = JsonSerializer.Serialize(turmas);
         await SetItemAsync("turmas", json);
-    }
-
-    public async Task AddTurmaAsync(Turma turma)
-    {
-        var turmas = await GetTurmasAsync();
-        turmas.Add(turma);
-        await SaveTurmasAsync(turmas);
     }
 
     public async Task UpdateTurmaAsync(Turma turma)
@@ -60,149 +51,13 @@ public class LocalStorageService
         await SaveTurmasAsync(turmas);
     }
 
-    // Métodos para Estudantes
-    public async Task<List<Estudante>> GetEstudantesAsync()
-    {
-        var json = await GetItemAsync("estudantes");
-        return string.IsNullOrEmpty(json) ? new List<Estudante>() : JsonSerializer.Deserialize<List<Estudante>>(json) ?? new List<Estudante>();
-    }
-
-    public async Task SaveEstudantesAsync(List<Estudante> estudantes)
-    {
-        var json = JsonSerializer.Serialize(estudantes);
-        await SetItemAsync("estudantes", json);
-    }
-
-    public async Task AddEstudanteAsync(Estudante estudante)
-    {
-        var estudantes = await GetEstudantesAsync();
-        estudantes.Add(estudante);
-        await SaveEstudantesAsync(estudantes);
-    }
-
-    // Métodos para Diários
-    public async Task<List<Diario>> GetDiariosAsync()
-    {
-        var json = await GetItemAsync("diarios");
-        return string.IsNullOrEmpty(json) ? new List<Diario>() : JsonSerializer.Deserialize<List<Diario>>(json) ?? new List<Diario>();
-    }
-
-    public async Task SaveDiariosAsync(List<Diario> diarios)
-    {
-        var json = JsonSerializer.Serialize(diarios);
-        await SetItemAsync("diarios", json);
-    }
-
-    public async Task AddDiarioAsync(Diario diario)
-    {
-        var diarios = await GetDiariosAsync();
-        diarios.Add(diario);
-        await SaveDiariosAsync(diarios);
-    }
-
-    public async Task UpdateDiarioAsync(Diario diario)
-    {
-        var diarios = await GetDiariosAsync();
-        var index = diarios.FindIndex(d => d.Id == diario.Id);
-        if (index >= 0)
-        {
-            diarios[index] = diario;
-            await SaveDiariosAsync(diarios);
-        }
-    }
-
-    public async Task SaveDiarioRecordAsync(string turmaId, string professorNome, string disciplina, DateTime data, string conteudo, string observacoes)
-    {
-        var turmas = await GetTurmasAsync();
-        var turma = turmas.FirstOrDefault(t => t.Id == turmaId);
-        
-        if (turma != null)
-        {
-            var diario = turma.Diarios.FirstOrDefault(d => 
-                d.ProfessorNome == professorNome && 
-                d.Disciplina == disciplina);
-            
-            if (diario == null)
-            {
-                diario = new Diario
-                {
-                    ProfessorNome = professorNome,
-                    Disciplina = disciplina,
-                    TurmaId = turmaId,
-                    Registros = new Dictionary<DateTime, string>()
-                };
-                turma.Diarios.Add(diario);
-            }
-            
-            // Formato: conteudo|observacoes
-            var recordData = $"{conteudo}|{observacoes}";
-            diario.Registros[data.Date] = recordData;
-            
-            await SaveTurmasAsync(turmas);
-        }
-    }
-
-    public async Task<(string conteudo, string observacoes)> GetDiarioRecordAsync(string turmaId, string professorNome, string disciplina, DateTime data)
-    {
-        var turmas = await GetTurmasAsync();
-        var turma = turmas.FirstOrDefault(t => t.Id == turmaId);
-        
-        if (turma != null)
-        {
-            var diario = turma.Diarios.FirstOrDefault(d => 
-                d.ProfessorNome == professorNome && 
-                d.Disciplina == disciplina);
-            
-            if (diario?.Registros.ContainsKey(data.Date) == true)
-            {
-                var recordData = diario.Registros[data.Date];
-                var parts = recordData.Split('|', 2);
-                return (parts.Length > 0 ? parts[0] : "", parts.Length > 1 ? parts[1] : "");
-            }
-        }
-        
-        return ("", "");
-    }
-
-    public async Task<List<string>> GetEducadoresAsync()
-    {
-        var turmas = await GetTurmasAsync();
-        return turmas
-            .SelectMany(t => t.Horarios)
-            .Select(h => h.Professor)
-            .Where(p => !string.IsNullOrEmpty(p))
-            .Distinct()
-            .OrderBy(p => p)
-            .ToList();
-    }
-
-    public async Task<List<Diario>> GetDiariosByEducadorAsync(string educador)
-    {
-        var turmas = await GetTurmasAsync();
-        
-        var educatorDiarios = turmas
-            // Projeta cada turma para sua lista de diários, garantindo que o ProfessorNome e TurmaId estão setados
-            .SelectMany(turma => turma.Diarios
-                .Where(diario => diario.ProfessorNome == educador)
-                .Select(diario => 
-                {
-                    // Garante que as propriedades de navegação estejam preenchidas
-                    diario.TurmaId = turma.Id;
-                    diario.TurmaNome = turma.Nome;
-                    return diario;
-                }))
-            .ToList();
-        
-        return educatorDiarios;
-    }
-
-    // Métodos base do localStorage
-    private async Task<string> GetItemAsync(string key)
+    // Métodos base do localStorage (persistência bruta)
+    public async Task<string> GetItemAsync(string key)
     {
         return await _jsRuntime.InvokeAsync<string>("localStorage.getItem", key);
     }
 
-    private async Task SetItemAsync(string key, string value)
+    public async Task SetItemAsync(string key, string value)
     {
         await _jsRuntime.InvokeVoidAsync("localStorage.setItem", key, value);
     }

@@ -7,8 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Registrar serviço de localStorage
+// Registrar serviços
 builder.Services.AddScoped<LocalStorageService>();
+builder.Services.AddScoped<TurmasService>();
+builder.Services.AddScoped<DiarioService>();
 
 var app = builder.Build();
 

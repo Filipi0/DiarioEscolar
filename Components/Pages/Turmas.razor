@@ -5,7 +5,7 @@
 @using DiarioEscolar.Components.Shared.Turmas
 @using DiarioEscolar.Dtos
 @using DiarioEscolar.Components.Layout
-@inject LocalStorageService LocalStorage
+@inject TurmasService TurmasService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
@@ -129,7 +129,7 @@
     {
         try
         {
-            turmas = await LocalStorage.GetTurmasAsync();
+            turmas = await TurmasService.GetTurmasAsync();
         }
         catch (Exception ex)
         {
@@ -178,7 +178,7 @@
         // Carregar sugestões de professores se for modal de horário
         if (modalType == TurmaDetail.ModalType.Horario)
         {
-            LoadProfessoresSugestoes();
+            _ = LoadProfessoresSugestoes();
         }
     }
 
@@ -251,7 +251,7 @@
     {
         if (selectedTurma != null)
         {
-            await LocalStorage.UpdateTurmaAsync(selectedTurma);
+            await TurmasService.UpdateTurmaAsync(selectedTurma);
             await LoadTurmas();
             selectedTurma = turmas.FirstOrDefault(t => t.Id == selectedTurma.Id);
             CloseModal();
@@ -265,34 +265,18 @@
             if (!string.IsNullOrEmpty(horarioEditandoId))
             {
                 // Editando horário existente
-                var horarioExistente = selectedTurma.Horarios.FirstOrDefault(h => h.Id == horarioEditandoId);
-                if (horarioExistente != null)
-                {
-                    horarioExistente.DiaSemana = int.Parse(horario.DiaSemana);
-                    horarioExistente.HoraInicio = horario.HoraInicio;
-                    horarioExistente.HoraFim = horario.HoraFim;
-                    horarioExistente.Disciplina = horario.Disciplina;
-                    horarioExistente.Professor = horario.Professor;
-                    await UpdateSelectedTurma();
-                }
+                await TurmasService.UpdateHorarioAsync(selectedTurma.Id, horarioEditandoId, horario);
                 horarioEditandoId = string.Empty;
             }
             else
             {
                 // Adicionando novo horário
-                var novoHorarioObj = new Horario
-                {
-                    DiaSemana = int.Parse(horario.DiaSemana),
-                    HoraInicio = horario.HoraInicio,
-                    HoraFim = horario.HoraFim,
-                    Disciplina = horario.Disciplina,
-                    Professor = horario.Professor,
-                    TurmaId = selectedTurma.Id
-                };
-
-                selectedTurma.Horarios.Add(novoHorarioObj);
-                await UpdateSelectedTurma();
+                await TurmasService.AddHorarioAsync(selectedTurma.Id, horario);
             }
+            
+            await LoadTurmas();
+            selectedTurma = turmas.FirstOrDefault(t => t.Id == selectedTurma.Id);
+            CloseModal();
         }
     }
 
@@ -303,28 +287,18 @@
             if (!string.IsNullOrEmpty(diarioEditandoId))
             {
                 // Editando diário existente
-                var diarioExistente = selectedTurma.Diarios.FirstOrDefault(d => d.Id == diarioEditandoId);
-                if (diarioExistente != null)
-                {
-                    diarioExistente.ProfessorNome = diario.ProfessorNome;
-                    diarioExistente.Disciplina = diario.Disciplina;
-                    await UpdateSelectedTurma();
-                }
+                await TurmasService.UpdateDiarioAsync(selectedTurma.Id, diarioEditandoId, diario);
                 diarioEditandoId = string.Empty;
             }
             else
             {
                 // Adicionando novo diário
-                var novoDiarioObj = new Diario
-                {
-                    ProfessorNome = diario.ProfessorNome,
-                    Disciplina = diario.Disciplina,
-                    TurmaId = selectedTurma.Id
-                };
-
-                selectedTurma.Diarios.Add(novoDiarioObj);
-                await UpdateSelectedTurma();
+                await TurmasService.AddDiarioAsync(selectedTurma.Id, diario);
             }
+            
+            await LoadTurmas();
+            selectedTurma = turmas.FirstOrDefault(t => t.Id == selectedTurma.Id);
+            CloseModal();
         }
     }
 
@@ -335,94 +309,41 @@
             if (!string.IsNullOrEmpty(estudanteEditandoId))
             {
                 // Editando estudante existente
-                var estudante = selectedTurma.Estudantes.FirstOrDefault(e => e.Id == estudanteEditandoId);
-                if (estudante != null)
-                {
-                    estudante.Nome = nome.Trim();
-                    selectedTurma.Estudantes = selectedTurma.Estudantes.OrderBy(e => e.Nome).ToList();
-                    await UpdateSelectedTurma();
-                }
+                await TurmasService.UpdateEstudanteAsync(selectedTurma.Id, estudanteEditandoId, nome);
                 estudanteEditandoId = string.Empty;
             }
             else
             {
                 // Adicionando novo estudante
-                var estudante = new Estudante
-                {
-                    Nome = nome.Trim(),
-                    TurmaId = selectedTurma.Id
-                };
-
-                selectedTurma.Estudantes.Add(estudante);
-                selectedTurma.Estudantes = selectedTurma.Estudantes.OrderBy(e => e.Nome).ToList();
-                
-                await UpdateSelectedTurma();
+                await TurmasService.AddEstudanteAsync(selectedTurma.Id, nome);
             }
+            
+            await LoadTurmas();
+            selectedTurma = turmas.FirstOrDefault(t => t.Id == selectedTurma.Id);
+            CloseModal();
         }
     }
 
     // Professor autocomplete methods
-    private void LoadProfessoresSugestoes()
+    private async Task LoadProfessoresSugestoes()
     {
-        professoresSugestoes.Clear();
-        professoresDisciplinas.Clear();
-        
-        var professoresUnicos = new HashSet<string>();
-        
-        foreach (var turma in turmas)
-        {
-            foreach (var horario in turma.Horarios)
-            {
-                if (!string.IsNullOrWhiteSpace(horario.Professor))
-                {
-                    professoresUnicos.Add(horario.Professor);
-                    if (!professoresDisciplinas.ContainsKey(horario.Professor))
-                    {
-                        professoresDisciplinas[horario.Professor] = horario.Disciplina;
-                    }
-                }
-            }
-            
-            foreach (var diario in turma.Diarios)
-            {
-                if (!string.IsNullOrWhiteSpace(diario.ProfessorNome))
-                {
-                    professoresUnicos.Add(diario.ProfessorNome);
-                    if (!professoresDisciplinas.ContainsKey(diario.ProfessorNome))
-                    {
-                        professoresDisciplinas[diario.ProfessorNome] = diario.Disciplina;
-                    }
-                }
-            }
-        }
-        
-        professoresSugestoes = professoresUnicos.OrderBy(p => p).ToList();
+        professoresSugestoes = await TurmasService.GetProfessoresAsync();
         professoresOriginais = new List<string>(professoresSugestoes);
+        professoresDisciplinas = await TurmasService.GetProfessoresDisciplinasAsync();
     }
 
-    private void OnProfessorInput(ChangeEventArgs e)
+    private async Task OnProfessorInput(ChangeEventArgs e)
     {
         var input = e.Value?.ToString() ?? string.Empty;
         novoHorario.Professor = input;
         
-        if (string.IsNullOrWhiteSpace(input))
-        {
-            professoresSugestoes = new List<string>(professoresOriginais);
-        }
-        else
-        {
-            professoresSugestoes = professoresOriginais
-                .Where(p => p.Contains(input, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
-        
+        professoresSugestoes = await TurmasService.FilterProfessoresAsync(input);
         StateHasChanged();
     }
 
-    private void OnProfessorFocus()
+    private async Task OnProfessorFocus()
     {
-        LoadProfessoresSugestoes();
-        professoresSugestoes = new List<string>(professoresOriginais);
+        await LoadProfessoresSugestoes();
         StateHasChanged();
     }
 
@@ -455,7 +376,7 @@
     {
         if (deleteItemType == "turma")
         {
-            await LocalStorage.DeleteTurmaAsync(deleteItemId);
+            await TurmasService.DeleteTurmaAsync(deleteItemId);
             await LoadTurmas();
             
             // Se a turma deletada era a selecionada, limpar seleção
@@ -466,30 +387,21 @@
         }
         else if (deleteItemType == "estudante" && selectedTurma != null)
         {
-            var estudante = selectedTurma.Estudantes.FirstOrDefault(e => e.Id == deleteItemId);
-            if (estudante != null)
-            {
-                selectedTurma.Estudantes.Remove(estudante);
-                await UpdateSelectedTurma();
-            }
+            await TurmasService.DeleteEstudanteAsync(selectedTurma.Id, deleteItemId);
+            await LoadTurmas();
+            selectedTurma = turmas.FirstOrDefault(t => t.Id == selectedTurma.Id);
         }
         else if (deleteItemType == "horário" && selectedTurma != null)
         {
-            var horario = selectedTurma.Horarios.FirstOrDefault(h => h.Id == deleteItemId);
-            if (horario != null)
-            {
-                selectedTurma.Horarios.Remove(horario);
-                await UpdateSelectedTurma();
-            }
+            await TurmasService.DeleteHorarioAsync(selectedTurma.Id, deleteItemId);
+            await LoadTurmas();
+            selectedTurma = turmas.FirstOrDefault(t => t.Id == selectedTurma.Id);
         }
         else if (deleteItemType == "diário" && selectedTurma != null)
         {
-            var diario = selectedTurma.Diarios.FirstOrDefault(d => d.Id == deleteItemId);
-            if (diario != null)
-            {
-                selectedTurma.Diarios.Remove(diario);
-                await UpdateSelectedTurma();
-            }
+            await TurmasService.DeleteDiarioAsync(selectedTurma.Id, deleteItemId);
+            await LoadTurmas();
+            selectedTurma = turmas.FirstOrDefault(t => t.Id == selectedTurma.Id);
         }
         
         CloseDeleteConfirmation();
@@ -545,7 +457,7 @@
             horarioEditandoId = horarioId;
             currentModal = TurmaDetail.ModalType.Horario;
             showModal = true;
-            LoadProfessoresSugestoes();
+            _ = LoadProfessoresSugestoes();
         }
     }
     

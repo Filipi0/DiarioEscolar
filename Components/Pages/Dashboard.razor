@@ -3,7 +3,7 @@
 @using DiarioEscolar.Services
 @using DiarioEscolar.Components.Shared
 @using DiarioEscolar.Components.Layout
-@inject LocalStorageService LocalStorage
+@inject TurmasService TurmasService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
@@ -184,7 +184,7 @@
     {
         try
         {
-            var turmas = await LocalStorage.GetTurmasAsync();
+            var turmas = await TurmasService.GetTurmasAsync();
             CalculateStats(turmas);
         }
         catch (Exception ex)
