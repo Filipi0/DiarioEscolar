@@ -90,7 +90,10 @@
                 Turmas="turmas"
                 OnBackToDiarios="() => selectedDiario = null"
                 OnBackToEducators="ClearSelection"
-                OnSaveRecord="SaveRecord" />
+                OnSaveRecord="SaveRecord"
+                OnAddStudent="HandleAddStudent"
+                OnEditStudent="HandleEditStudent"
+                OnDeleteStudent="HandleDeleteStudent" />
         }
     </div>
 </div>
@@ -225,6 +228,28 @@
             // Em uma aplicação real, logar o erro
             Console.WriteLine($"Erro ao salvar registro: {ex.Message}");
         }
+    }
+
+    // Métodos para gerenciamento de estudantes no diário
+    private void HandleAddStudent((string StudentName, string TurmaId) data)
+    {
+        // Aqui implementaríamos a abertura do modal de adicionar estudante
+        // Por enquanto, vamos redirecionar para a página de turmas onde já existe a funcionalidade
+        Navigation?.NavigateTo($"/turmas");
+    }
+    
+    private void HandleEditStudent((string StudentId, string StudentName) data)
+    {
+        // Aqui implementaríamos a abertura do modal de editar estudante
+        // Por enquanto, vamos redirecionar para a página de turmas onde já existe a funcionalidade
+        Navigation?.NavigateTo($"/turmas");
+    }
+    
+    private void HandleDeleteStudent((string StudentId, string StudentName) data)
+    {
+        // Aqui implementaríamos a confirmação e exclusão do estudante
+        // Por enquanto, vamos redirecionar para a página de turmas onde já existe a funcionalidade
+        Navigation?.NavigateTo($"/turmas");
     }
 
     private void HandleViewChange(ViewType view)

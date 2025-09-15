@@ -7,6 +7,7 @@ public class Estudante
     public DateTime DataNascimento { get; set; }
     public string Email { get; set; } = string.Empty;
     public string TurmaId { get; set; } = string.Empty;
+    public int Ordem { get; set; } = 0;
 }
 
 public class Horario

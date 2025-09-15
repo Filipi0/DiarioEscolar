@@ -91,11 +91,11 @@
                      IconSvg="@Icons.Users"
                      IsScrollable="true"
                      OnAdd="() => OnShowModal.InvokeAsync(ModalType.Estudante)">
-            @if (SelectedTurma.Estudantes.Any())
+            @if (EstudantesOrdenados.Any())
             {
-                @for (int i = 0; i < SelectedTurma.Estudantes.Count; i++)
+                @for (int i = 0; i < EstudantesOrdenados.Count; i++)
                 {
-                    var estudante = SelectedTurma.Estudantes[i];
+                    var estudante = EstudantesOrdenados[i];
                     <StudentCard Index="@(i + 1)" 
                                Name="@estudante.Nome" 
                                EstudanteId="@estudante.Id"
@@ -122,6 +122,10 @@
     [Parameter] public EventCallback<(string Id, string Nome)> OnDeleteHorario { get; set; }
     [Parameter] public EventCallback<string> OnEditDiario { get; set; }
     [Parameter] public EventCallback<(string Id, string Nome)> OnDeleteDiario { get; set; }
+
+    // Propriedade computada para retornar estudantes ordenados por nome
+    private List<Estudante> EstudantesOrdenados => 
+        SelectedTurma?.Estudantes?.OrderBy(e => e.Nome).ToList() ?? new List<Estudante>();
 
     public enum ModalType
     {

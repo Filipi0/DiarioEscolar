@@ -46,10 +46,24 @@
     gap: 2rem;
 }
 
+.side-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
 @media (max-width: 1024px) {
     .detail-content {
         grid-template-columns: 1fr;
         gap: 1.5rem;
+    }
+    
+    .side-content {
+        order: 2;
+    }
+    
+    .calendar-section {
+        order: 1;
     }
 }
 
@@ -414,5 +428,211 @@
     .calendar-day {
         min-height: 45px;
         padding: 0.25rem;
+    }
+}
+
+/* Seção de Estudantes */
+.students-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+}
+
+.students-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.students-header .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.students-header .section-title .icon {
+    width: 24px;
+    height: 24px;
+}
+
+.students-header .section-title .icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.students-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.add-student-button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.add-student-button:hover {
+    background: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.students-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.student-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.student-item:hover {
+    border-color: var(--primary);
+    background: var(--hover-bg);
+}
+
+.student-number {
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.student-name {
+    flex: 1;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.student-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.student-actions .edit-btn,
+.student-actions .delete-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.student-actions .edit-btn {
+    background: rgba(59, 130, 246, 0.1);
+    color: rgb(59, 130, 246);
+}
+
+.student-actions .edit-btn:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: scale(1.05);
+}
+
+.student-actions .delete-btn {
+    background: rgba(239, 68, 68, 0.1);
+    color: rgb(239, 68, 68);
+}
+
+.student-actions .delete-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: scale(1.05);
+}
+
+.student-actions img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+}
+
+.empty-students {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.empty-students .empty-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-students p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Responsividade para a seção de estudantes */
+@media (max-width: 768px) {
+    .students-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .add-student-button {
+        align-self: stretch;
+        justify-content: center;
+    }
+    
+    .student-item {
+        padding: 0.5rem;
+    }
+    
+    .student-number {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+    
+    .student-actions .edit-btn,
+    .student-actions .delete-btn {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .student-actions img {
+        width: 14px;
+        height: 14px;
     }
 }

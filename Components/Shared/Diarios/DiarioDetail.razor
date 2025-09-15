@@ -72,53 +72,89 @@
             </div>
         </div>
 
-        @if (!selectedDate.HasValue)
-        {
-            <div class="register-section">
-                <div class="register-header">
-                    <h3>Selecione uma Data</h3>
-                    <p>Clique em um dia com aula no calendário para registrar ou visualizar conteúdos</p>
-                </div>
-            </div>
-        }
-        else
-        {
-            <div class="register-section">
-                <div class="register-header with-actions">
-                    <div>
-                        <h3>Registro - @selectedDate?.ToString("dd/MM/yyyy")</h3>
-                    </div>
-                    <div class="register-actions">
-                        <button @onclick="HandleSaveRecord" class="save-button" disabled="@isSaving">
-                            @if (isSaving)
-                            {
-                                <span>Salvando...</span>
-                            }
-                            else
-                            {
-                                <span>Salvar</span>
-                            }
-                        </button>
+        <div class="side-content">
+            @if (!selectedDate.HasValue)
+            {
+                <div class="register-section">
+                    <div class="register-header">
+                        <h3>Selecione uma Data</h3>
+                        <p>Clique em um dia com aula no calendário para registrar ou visualizar conteúdos</p>
                     </div>
                 </div>
-
-                <div class="register-form">
-                    <div class="form-group">
-                        <label>Conteúdo da Aula</label>
-                        <textarea @bind="currentRecord.Content"
-                                  placeholder="Descreva o conteúdo abordado na aula..."
-                                  class="content-textarea"></textarea>
+            }
+            else
+            {
+                <div class="register-section">
+                    <div class="register-header with-actions">
+                        <div>
+                            <h3>Registro - @selectedDate?.ToString("dd/MM/yyyy")</h3>
+                        </div>
+                        <div class="register-actions">
+                            <button @onclick="HandleSaveRecord" class="save-button" disabled="@isSaving">
+                                @if (isSaving)
+                                {
+                                    <span>Salvando...</span>
+                                }
+                                else
+                                {
+                                    <span>Salvar</span>
+                                }
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Observações</label>
-                        <textarea @bind="currentRecord.Observations"
-                                  placeholder="Adicione observações sobre a aula, comportamento dos alunos, etc."
-                                  class="observations-textarea"></textarea>
+                    <div class="register-form">
+                        <div class="form-group">
+                            <label>Conteúdo da Aula</label>
+                            <textarea @bind="currentRecord.Content"
+                                      placeholder="Descreva o conteúdo abordado na aula..."
+                                      class="content-textarea"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Observações</label>
+                            <textarea @bind="currentRecord.Observations"
+                                      placeholder="Adicione observações sobre a aula, comportamento dos alunos, etc."
+                                      class="observations-textarea"></textarea>
+                        </div>
                     </div>
                 </div>
+            }
+
+            <!-- Seção de Estudantes -->
+            <div class="students-section">
+                <div class="students-header">
+                    <div class="section-title">
+                        <div class="icon">
+                            <img src="/user.png" alt="Ícone de estudantes" class="icon-img" />
+                        </div>
+                        <h3>Estudantes da Turma</h3>
+                    </div>
+                   
+                </div>
+
+                <div class="students-list">
+                    @if (CurrentTurmaStudents.Any())
+                    {
+                        @for (int i = 0; i < CurrentTurmaStudents.Count; i++)
+                        {
+                            var student = CurrentTurmaStudents[i];
+                            <div class="student-item">
+                                <div class="student-number">@(i + 1)</div>
+                                <div class="student-name">@student.Nome</div
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-students">
+                            <div class="empty-icon">👥</div>
+                            <p>Nenhum estudante cadastrado nesta turma</p>
+                        </div>
+                    }
+                </div>
             </div>
-        }
+        </div>
     </div>
 </div>
 
@@ -129,11 +165,19 @@
     [Parameter] public EventCallback OnBackToDiarios { get; set; }
     [Parameter] public EventCallback OnBackToEducators { get; set; }
     [Parameter] public EventCallback<(DiaryRecord Record, DateTime Date)> OnSaveRecord { get; set; }
+    [Parameter] public EventCallback<(string StudentName, string TurmaId)> OnAddStudent { get; set; }
+    [Parameter] public EventCallback<(string StudentId, string StudentName)> OnEditStudent { get; set; }
+    [Parameter] public EventCallback<(string StudentId, string StudentName)> OnDeleteStudent { get; set; }
     
     private DateTime currentMonth = DateTime.Now;
     private DateTime? selectedDate = null;
     private DiaryRecord currentRecord = new();
     private bool isSaving = false;
+    
+    // Propriedade computada para estudantes da turma atual, ordenados por nome
+    private List<Estudante> CurrentTurmaStudents => 
+        Turmas.FirstOrDefault(t => t.Id == SelectedDiario.TurmaId)?.Estudantes
+               .OrderBy(e => e.Nome).ToList() ?? new List<Estudante>();
     
     public class DiaryRecord
     {
@@ -238,5 +282,25 @@
         isSaving = true;
         await OnSaveRecord.InvokeAsync((currentRecord, selectedDate.Value));
         isSaving = false;
+    }
+    
+    // Métodos para gerenciamento de estudantes
+    private async Task ShowAddStudentModal()
+    {
+        await OnAddStudent.InvokeAsync(("", SelectedDiario.TurmaId));
+    }
+    
+    private async Task EditStudent(string studentId)
+    {
+        var student = CurrentTurmaStudents.FirstOrDefault(s => s.Id == studentId);
+        if (student != null)
+        {
+            await OnEditStudent.InvokeAsync((studentId, student.Nome));
+        }
+    }
+    
+    private async Task DeleteStudent(string studentId, string studentName)
+    {
+        await OnDeleteStudent.InvokeAsync((studentId, studentName));
     }
 }
