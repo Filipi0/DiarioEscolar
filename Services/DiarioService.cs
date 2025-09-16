@@ -76,12 +76,6 @@ namespace DiarioEscolar.Services
         // Salvar registro de aula com DTO
         public async Task SaveDiarioRecordAsync(string diarioId, DiaryRecordDto recordDto)
         {
-            await SaveDiarioRecordAsync(diarioId, recordDto.Date, recordDto.Content, recordDto.Observations);
-        }
-
-        // Salvar registro de aula (método legacy)
-        public async Task SaveDiarioRecordAsync(string diarioId, DateTime date, string content, string observations)
-        {
             var turmas = await _turmasService.GetTurmasAsync();
             var diario = turmas.SelectMany(t => t.Diarios).FirstOrDefault(d => d.Id == diarioId);
             
@@ -90,8 +84,8 @@ namespace DiarioEscolar.Services
                 if (diario.Registros == null)
                     diario.Registros = new Dictionary<DateTime, string>();
 
-                var recordData = $"{content}|{observations}";
-                diario.Registros[date.Date] = recordData;
+                var recordData = $"{recordDto.Content}|{recordDto.Observations}";
+                diario.Registros[recordDto.Date.Date] = recordData;
 
                 // Encontra a turma pai para salvar usando TurmasService
                 var turmaPai = turmas.FirstOrDefault(t => t.Id == diario.TurmaId);
@@ -145,6 +139,13 @@ namespace DiarioEscolar.Services
             return turma?.Estudantes?.Count ?? 0;
         }
 
+        // Obter estudantes ordenados de uma turma
+        public async Task<List<Estudante>> GetTurmaStudentsAsync(string turmaId)
+        {
+            var turma = await _turmasService.GetTurmaByIdAsync(turmaId);
+            return turma?.Estudantes?.OrderBy(e => e.Nome).ToList() ?? new List<Estudante>();
+        }
+
         // Obter horários de uma turma para verificar dias de aula
         public async Task<List<Horario>> GetTurmaHorariosAsync(string turmaId)
         {
@@ -180,6 +181,41 @@ namespace DiarioEscolar.Services
         public async Task DeleteEstudanteFromTurmaAsync(string turmaId, string estudanteId)
         {
             await _turmasService.DeleteEstudanteAsync(turmaId, estudanteId);
+        }
+
+        // Método para criar DTOs completos com todos os dados necessários
+        public async Task<List<DiarioComTurmaDto>> GetDiariosComTurmaCompletosAsync(string educatorName)
+        {
+            var turmas = await _turmasService.GetTurmasAsync();
+            var diarios = turmas.SelectMany(t => t.Diarios)
+                               .Where(d => d.ProfessorNome == educatorName)
+                               .ToList();
+
+            var diariosCompletos = new List<DiarioComTurmaDto>();
+
+            foreach (var diario in diarios)
+            {
+                var turma = turmas.FirstOrDefault(t => t.Id == diario.TurmaId);
+                if (turma != null)
+                {
+                    var diarioDto = new DiarioComTurmaDto
+                    {
+                        Id = diario.Id,
+                        TurmaId = diario.TurmaId,
+                        TurmaNome = turma.Nome,
+                        TurmaSerie = turma.Serie,
+                        Disciplina = diario.Disciplina,
+                        ProfessorNome = diario.ProfessorNome,
+                        NumeroEstudantes = turma.Estudantes?.Count ?? 0,
+                        TurmaStudents = turma.Estudantes?.OrderBy(e => e.Nome).ToList() ?? new List<Estudante>(),
+                        TurmaHorarios = turma.Horarios ?? new List<Horario>(),
+                        Registros = diario.Registros ?? new Dictionary<DateTime, string>()
+                    };
+                    diariosCompletos.Add(diarioDto);
+                }
+            }
+
+            return diariosCompletos;
         }
     }
 }

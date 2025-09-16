@@ -1,4 +1,5 @@
 @using DiarioEscolar.Models
+@using DiarioEscolar.Dtos
 
 <div class="diarios-section">
     <div class="section-header">
@@ -15,20 +16,20 @@
         <h2>Diários</h2>
     </div>
 
-    @if (Diarios.Any())
+    @if (DiariosComTurma.Any())
     {
         <div class="diarios-grid">
-            @foreach (var diario in Diarios)
+            @foreach (var diario in DiariosComTurma)
             {
                 <div class="diario-card" @onclick="() => OnSelectDiario.InvokeAsync(diario)">
                     <div class="diario-header">
-                        <div class="diario-title">@GetTurmaName(diario.TurmaId)</div>
-                        <div class="diario-badge">@GetSerie(diario.TurmaId)</div>
+                        <div class="diario-title">@diario.TurmaNome</div>
+                        <div class="diario-badge">@diario.TurmaSerie</div>
                     </div>
                     <div class="diario-subject">@diario.Disciplina</div>
                     <div class="diario-info">
                         <div class="student-count">
-                            👥 @GetStudentCount(diario.TurmaId) estudantes
+                            👥 @diario.NumeroEstudantes estudantes
                         </div>
                     </div>
                 </div>
@@ -47,23 +48,7 @@
 
 @code {
     [Parameter] public string EducatorName { get; set; } = string.Empty;
-    [Parameter] public List<Diario> Diarios { get; set; } = new();
-    [Parameter] public List<Turma> Turmas { get; set; } = new();
+    [Parameter] public List<DiarioComTurmaDto> DiariosComTurma { get; set; } = new();
     [Parameter] public EventCallback OnBack { get; set; }
-    [Parameter] public EventCallback<Diario> OnSelectDiario { get; set; }
-
-    private string GetTurmaName(string turmaId)
-    {
-        return Turmas.FirstOrDefault(t => t.Id == turmaId)?.Nome ?? "Turma";
-    }
-
-    private string GetSerie(string turmaId)
-    {
-        return Turmas.FirstOrDefault(t => t.Id == turmaId)?.Serie ?? "";
-    }
-
-    private int GetStudentCount(string turmaId)
-    {
-        return Turmas.FirstOrDefault(t => t.Id == turmaId)?.Estudantes.Count ?? 0;
-    }
+    [Parameter] public EventCallback<DiarioComTurmaDto> OnSelectDiario { get; set; }
 }

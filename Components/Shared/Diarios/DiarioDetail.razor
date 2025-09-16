@@ -1,5 +1,5 @@
 @using DiarioEscolar.Models
-@using DiarioEscolar.Services
+@using DiarioEscolar.Dtos
 @using System.Globalization
 
 <div class="diario-detail">
@@ -9,7 +9,7 @@
             <span class="breadcrumb-separator">></span>
             <span @onclick="OnBackToDiarios" class="breadcrumb-link">Diários</span>
             <span class="breadcrumb-separator">></span>
-            <span class="breadcrumb-current">@GetTurmaName(SelectedDiario.TurmaId) - @SelectedDiario.Disciplina</span>
+            <span class="breadcrumb-current">@DiarioCompleto.TurmaNome - @DiarioCompleto.Disciplina</span>
         </div>
     </div>
 
@@ -20,7 +20,7 @@
                     <div class="icon">
                         <img src="/classe.png" alt="Ícone de calendário" class="icon-img" />
                     </div>
-                    <h3>@GetTurmaName(SelectedDiario.TurmaId) - @SelectedDiario.Disciplina</h3>
+                    <h3>@DiarioCompleto.TurmaNome - @DiarioCompleto.Disciplina</h3>
                 </div>
                 <div class="calendar-navigation">
                     <button @onclick="PreviousMonth" class="nav-button">‹</button>
@@ -134,11 +134,11 @@
                 </div>
 
                 <div class="students-list">
-                    @if (CurrentTurmaStudents.Any())
+                    @if (DiarioCompleto.TurmaStudents.Any())
                     {
-                        @for (int i = 0; i < CurrentTurmaStudents.Count; i++)
+                        @for (int i = 0; i < DiarioCompleto.TurmaStudents.Count; i++)
                         {
-                            var student = CurrentTurmaStudents[i];
+                            var student = DiarioCompleto.TurmaStudents[i];
                             <div class="student-item">
                                 <div class="student-number">@(i + 1)</div>
                                 <div class="student-name">@student.Nome</div
@@ -160,8 +160,7 @@
 
 @code {
     [Parameter] public string SelectedEducator { get; set; } = string.Empty;
-    [Parameter] public Diario SelectedDiario { get; set; } = new();
-    [Parameter] public List<Turma> Turmas { get; set; } = new();
+    [Parameter] public DiarioComTurmaDto DiarioCompleto { get; set; } = new();
     [Parameter] public EventCallback OnBackToDiarios { get; set; }
     [Parameter] public EventCallback OnBackToEducators { get; set; }
     [Parameter] public EventCallback<(DiaryRecord Record, DateTime Date)> OnSaveRecord { get; set; }
@@ -174,27 +173,18 @@
     private DiaryRecord currentRecord = new();
     private bool isSaving = false;
     
-    // Propriedade computada para estudantes da turma atual, ordenados por nome
-    private List<Estudante> CurrentTurmaStudents => 
-        Turmas.FirstOrDefault(t => t.Id == SelectedDiario.TurmaId)?.Estudantes
-               .OrderBy(e => e.Nome).ToList() ?? new List<Estudante>();
-    
     public class DiaryRecord
     {
         public string Content { get; set; } = "";
         public string Observations { get; set; } = "";
     }
     
-    protected override void OnParametersSet()
+    protected override Task OnParametersSetAsync()
     {
         currentRecord = new();
         selectedDate = null;
         LoadRecord();
-    }
-    
-    private string GetTurmaName(string turmaId)
-    {
-        return Turmas.FirstOrDefault(t => t.Id == turmaId)?.Nome ?? "Turma";
+        return Task.CompletedTask;
     }
 
     private void PreviousMonth()
@@ -236,15 +226,16 @@
 
     private bool HasClassOnDay(DateTime date)
     {
-        var turma = Turmas.FirstOrDefault(t => t.Id == SelectedDiario.TurmaId);
-        if (turma == null) return false;
+        if (DiarioCompleto?.TurmaHorarios == null) return false;
         var dayOfWeek = (int)date.DayOfWeek;
-        return turma.Horarios.Any(h => h.Professor == SelectedDiario.ProfessorNome && h.Disciplina == SelectedDiario.Disciplina && h.DiaSemana == dayOfWeek);
+        return DiarioCompleto.TurmaHorarios.Any(h => h.Professor == DiarioCompleto.ProfessorNome && 
+                                                   h.Disciplina == DiarioCompleto.Disciplina && 
+                                                   h.DiaSemana == dayOfWeek);
     }
 
     private bool HasRecord(DateTime date)
     {
-        return SelectedDiario.Registros.ContainsKey(date.Date);
+        return DiarioCompleto?.Registros?.ContainsKey(date.Date) ?? false;
     }
     
     private void SelectDate(DateTime date)
@@ -256,11 +247,11 @@
     
     private void LoadRecord()
     {
-        if (selectedDate.HasValue && SelectedDiario != null)
+        if (selectedDate.HasValue && DiarioCompleto?.Registros != null)
         {
-            if (SelectedDiario.Registros.ContainsKey(selectedDate.Value.Date))
+            if (DiarioCompleto.Registros.ContainsKey(selectedDate.Value.Date))
             {
-                var recordData = SelectedDiario.Registros[selectedDate.Value.Date];
+                var recordData = DiarioCompleto.Registros[selectedDate.Value.Date];
                 var parts = recordData.Split('|', 2);
                 currentRecord.Content = parts.Length > 0 ? parts[0] : "";
                 currentRecord.Observations = parts.Length > 1 ? parts[1] : "";
@@ -278,7 +269,7 @@
     
     private async Task HandleSaveRecord()
     {
-        if (!selectedDate.HasValue || SelectedDiario == null) return;
+        if (!selectedDate.HasValue || DiarioCompleto == null) return;
         isSaving = true;
         await OnSaveRecord.InvokeAsync((currentRecord, selectedDate.Value));
         isSaving = false;
@@ -287,12 +278,12 @@
     // Métodos para gerenciamento de estudantes
     private async Task ShowAddStudentModal()
     {
-        await OnAddStudent.InvokeAsync(("", SelectedDiario.TurmaId));
+        await OnAddStudent.InvokeAsync(("", DiarioCompleto.TurmaId));
     }
     
     private async Task EditStudent(string studentId)
     {
-        var student = CurrentTurmaStudents.FirstOrDefault(s => s.Id == studentId);
+        var student = DiarioCompleto.TurmaStudents.FirstOrDefault(s => s.Id == studentId);
         if (student != null)
         {
             await OnEditStudent.InvokeAsync((studentId, student.Nome));

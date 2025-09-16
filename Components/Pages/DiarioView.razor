@@ -74,12 +74,11 @@
                 }
             </div>
         }
-        else if (selectedDiario == null)
+        else if (selectedDiarioCompleto == null)
         {
             <DiarioListing
                 EducatorName="@selectedEducator"
-                Diarios="educatorDiarios"
-                Turmas="turmas"
+                DiariosComTurma="educatorDiariosCompletos"
                 OnBack="ClearSelection"
                 OnSelectDiario="SelectDiario" />
         }
@@ -87,9 +86,8 @@
         {
             <DiarioDetail
                 SelectedEducator="@selectedEducator"
-                SelectedDiario="selectedDiario"
-                Turmas="turmas"
-                OnBackToDiarios="() => selectedDiario = null"
+                DiarioCompleto="selectedDiarioCompleto"
+                OnBackToDiarios="() => selectedDiarioCompleto = null"
                 OnBackToEducators="ClearSelection"
                 OnSaveRecord="SaveRecord"
                 OnAddStudent="HandleAddStudent"
@@ -120,11 +118,11 @@
     private List<Turma> turmas = new();
     private List<string> allEducators = new();
     private List<string> filteredEducators = new();
-    private List<Diario> educatorDiarios = new();
+    private List<DiarioComTurmaDto> educatorDiariosCompletos = new();
     
     private string searchTerm = "";
     private string selectedEducator = "";
-    private Diario? selectedDiario = null;
+    private DiarioComTurmaDto? selectedDiarioCompleto = null;
     
     private bool isInitialized = false;
     private bool showSaveConfirmation = false;
@@ -172,27 +170,27 @@
 
     private async void LoadEducatorDiarios()
     {
-        educatorDiarios = await DiarioService.GetDiariosByEducatorAsync(selectedEducator);
+        educatorDiariosCompletos = await DiarioService.GetDiariosComTurmaCompletosAsync(selectedEducator);
         StateHasChanged();
     }
 
-    private void SelectDiario(Diario diario)
+    private void SelectDiario(DiarioComTurmaDto diarioDto)
     {
-        selectedDiario = diario;
+        selectedDiarioCompleto = diarioDto;
     }
-
+    
     private void ClearSelection()
     {
         selectedEducator = "";
-        selectedDiario = null;
+        selectedDiarioCompleto = null;
         searchTerm = "";
         filteredEducators.Clear();
-        educatorDiarios.Clear();
+        educatorDiariosCompletos.Clear();
     }
 
     private async Task SaveRecord((DiarioDetail.DiaryRecord record, DateTime date) data)
     {
-        if (selectedDiario == null) return;
+        if (selectedDiarioCompleto == null) return;
         
         try
         {
@@ -205,14 +203,11 @@
             };
 
             // Chame o método do novo serviço com o DTO
-            await DiarioService.SaveDiarioRecordAsync(selectedDiario.Id, recordDto);
+            await DiarioService.SaveDiarioRecordAsync(selectedDiarioCompleto.Id, recordDto);
             
-            // Atualizar o diário local para refletir a mudança
-            if (selectedDiario.Registros == null)
-                selectedDiario.Registros = new Dictionary<DateTime, string>();
-            
+            // Atualizar o registro localmente no DTO
             var recordData = $"{data.record.Content}|{data.record.Observations}";
-            selectedDiario.Registros[data.date.Date] = recordData;
+            selectedDiarioCompleto.Registros[data.date.Date] = recordData;
             
             // Mostrar modal de confirmação
             showSaveConfirmation = true;
@@ -233,34 +228,46 @@
     // Métodos para gerenciamento de estudantes no diário
     private async Task HandleAddStudent((string StudentName, string TurmaId) data)
     {
-        if (selectedDiario != null)
+        if (selectedDiarioCompleto != null)
         {
-            await DiarioService.AddEstudanteToTurmaAsync(selectedDiario.TurmaId, data.StudentName);
-            // Recarregar dados da turma
-            turmas = await TurmasService.GetTurmasAsync();
+            await DiarioService.AddEstudanteToTurmaAsync(selectedDiarioCompleto.TurmaId, data.StudentName);
+            // Recarregar dados da turma específica
+            await RefreshDiarioData(selectedDiarioCompleto.TurmaId);
             StateHasChanged();
         }
     }
     
     private async Task HandleEditStudent((string StudentId, string StudentName) data)
     {
-        if (selectedDiario != null)
+        if (selectedDiarioCompleto != null)
         {
-            await DiarioService.UpdateEstudanteInTurmaAsync(selectedDiario.TurmaId, data.StudentId, data.StudentName);
-            // Recarregar dados da turma
-            turmas = await TurmasService.GetTurmasAsync();
+            await DiarioService.UpdateEstudanteInTurmaAsync(selectedDiarioCompleto.TurmaId, data.StudentId, data.StudentName);
+            // Recarregar dados da turma específica
+            await RefreshDiarioData(selectedDiarioCompleto.TurmaId);
             StateHasChanged();
         }
     }
     
     private async Task HandleDeleteStudent((string StudentId, string StudentName) data)
     {
-        if (selectedDiario != null)
+        if (selectedDiarioCompleto != null)
         {
-            await DiarioService.DeleteEstudanteFromTurmaAsync(selectedDiario.TurmaId, data.StudentId);
-            // Recarregar dados da turma
-            turmas = await TurmasService.GetTurmasAsync();
+            await DiarioService.DeleteEstudanteFromTurmaAsync(selectedDiarioCompleto.TurmaId, data.StudentId);
+            // Recarregar dados da turma específica
+            await RefreshDiarioData(selectedDiarioCompleto.TurmaId);
             StateHasChanged();
+        }
+    }
+    
+    // Método auxiliar para recarregar dados da turma após mudanças
+    private async Task RefreshDiarioData(string turmaId)
+    {
+        turmas = await TurmasService.GetTurmasAsync();
+        var turma = turmas.FirstOrDefault(t => t.Id == turmaId);
+        if (turma != null && selectedDiarioCompleto != null)
+        {
+            selectedDiarioCompleto.TurmaStudents = turma.Estudantes?.OrderBy(e => e.Nome).ToList() ?? new List<Estudante>();
+            selectedDiarioCompleto.NumeroEstudantes = turma.Estudantes?.Count ?? 0;
         }
     }
 
