@@ -194,7 +194,6 @@
         
         try
         {
-            // Crie um DTO com os dados do registro
             var recordDto = new DiaryRecordDto
             {
                 Date = data.date,
@@ -202,14 +201,12 @@
                 Observations = data.record.Observations
             };
 
-            // Chame o método do novo serviço com o DTO
             await DiarioService.SaveDiarioRecordAsync(selectedDiarioCompleto.Id, recordDto);
             
-            // Atualizar o registro localmente no DTO
+            // Atualizar o registro localmente
             var recordData = $"{data.record.Content}|{data.record.Observations}";
             selectedDiarioCompleto.Registros[data.date.Date] = recordData;
             
-            // Mostrar modal de confirmação
             showSaveConfirmation = true;
             StateHasChanged();
             
@@ -220,7 +217,6 @@
         }
         catch (Exception ex)
         {
-            // Em uma aplicação real, logar o erro
             Console.WriteLine($"Erro ao salvar registro: {ex.Message}");
         }
     }

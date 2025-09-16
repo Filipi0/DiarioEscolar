@@ -1,6 +1,4 @@
-// Função para garantir que o Chart.js seja carregado
 async function ensureChartJsIsLoaded() {
-    // Se o Chart.js já estiver disponível, retorna imediatamente
     if (typeof Chart !== 'undefined') {
         return Promise.resolve();
     }
@@ -22,7 +20,7 @@ async function ensureChartJsIsLoaded() {
 }
 
 export async function renderPieChart(canvasId, title, labels, data) {
-    // Garante que o Chart.js esteja carregado antes de continuar
+
     await ensureChartJsIsLoaded();
     
     const ctx = document.getElementById(canvasId);
@@ -44,7 +42,6 @@ export async function renderPieChart(canvasId, title, labels, data) {
         'rgba(54, 23, 105, 0.8)'
     ];
     
-    // Adiciona cores de borda com base nas cores de fundo
     const borderColors = backgroundColors.map(color => color.replace('0.8', '1'));
 
     if (ctx) {

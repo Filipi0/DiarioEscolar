@@ -1,7 +1,6 @@
 @using DiarioEscolar.Models
 
 <div class="sidebar">
-    <!-- Header -->
     <div class="sidebar-header">
         <button class="logo-button" @onclick="() => OnBackToLanding.InvokeAsync()">
             <div class="logo-icon">
@@ -14,7 +13,6 @@
         </button>
     </div>
 
-    <!-- Menu -->
     <nav class="sidebar-nav">
         <ul class="menu-list">
             @foreach (var item in menuItems)
@@ -38,8 +36,6 @@
             }
         </ul>
     </nav>
-
-    <!-- Footer -->
    
 </div>
 

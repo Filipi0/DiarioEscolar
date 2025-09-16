@@ -15,18 +15,20 @@ namespace DiarioEscolar.Services
             _localStorage = localStorage;
         }
 
-        // Operações básicas de Turmas
+        // listar todas as turmas
         public async Task<List<Turma>> GetTurmasAsync()
         {
             return await _localStorage.GetTurmasAsync();
         }
 
+        // obter turma por id
         public async Task<Turma?> GetTurmaByIdAsync(string id)
         {
             var turmas = await GetTurmasAsync();
             return turmas.FirstOrDefault(t => t.Id == id);
         }
 
+        // adicionar nova turma
         public async Task AddTurmaAsync(Turma turma)
         {
             var turmas = await GetTurmasAsync();
@@ -34,17 +36,19 @@ namespace DiarioEscolar.Services
             await _localStorage.SaveTurmasAsync(turmas);
         }
 
+        // atualizar turma
         public async Task UpdateTurmaAsync(Turma turma)
         {
             await _localStorage.UpdateTurmaAsync(turma);
         }
 
+        // deletar turma
         public async Task DeleteTurmaAsync(string id)
         {
             await _localStorage.DeleteTurmaAsync(id);
         }
 
-        // Operações de Estudantes
+        // adicionar estudante
         public async Task AddEstudanteAsync(string turmaId, string nomeEstudante)
         {
             var turmas = await GetTurmasAsync();
@@ -63,6 +67,7 @@ namespace DiarioEscolar.Services
             }
         }
 
+        // atualizar estudante
         public async Task UpdateEstudanteAsync(string turmaId, string estudanteId, string novoNome)
         {
             var turmas = await GetTurmasAsync();
@@ -79,6 +84,7 @@ namespace DiarioEscolar.Services
             }
         }
 
+        // deletar estudante
         public async Task DeleteEstudanteAsync(string turmaId, string estudanteId)
         {
             var turmas = await GetTurmasAsync();
@@ -94,7 +100,7 @@ namespace DiarioEscolar.Services
             }
         }
 
-        // Operações de Horários
+        // adicionar um novo horário
         public async Task AddHorarioAsync(string turmaId, NovoHorarioDto horarioDto)
         {
             var turmas = await GetTurmasAsync();
@@ -116,6 +122,7 @@ namespace DiarioEscolar.Services
             }
         }
 
+        // Atualiza um horário existente
         public async Task UpdateHorarioAsync(string turmaId, string horarioId, NovoHorarioDto horarioDto)
         {
             var turmas = await GetTurmasAsync();
@@ -135,6 +142,7 @@ namespace DiarioEscolar.Services
             }
         }
 
+        // Deleta um horário existente
         public async Task DeleteHorarioAsync(string turmaId, string horarioId)
         {
             var turmas = await GetTurmasAsync();
@@ -150,7 +158,7 @@ namespace DiarioEscolar.Services
             }
         }
 
-        // Operações de Diários
+        // adicionar Diário
         public async Task AddDiarioAsync(string turmaId, NovoDiarioDto diarioDto)
         {
             var turmas = await GetTurmasAsync();
@@ -170,6 +178,7 @@ namespace DiarioEscolar.Services
             }
         }
 
+        // atualizar Diário
         public async Task UpdateDiarioAsync(string turmaId, string diarioId, NovoDiarioDto diarioDto)
         {
             var turmas = await GetTurmasAsync();
@@ -186,6 +195,7 @@ namespace DiarioEscolar.Services
             }
         }
 
+        // deletar Diário
         public async Task DeleteDiarioAsync(string turmaId, string diarioId)
         {
             var turmas = await GetTurmasAsync();
@@ -201,7 +211,7 @@ namespace DiarioEscolar.Services
             }
         }
 
-        // Operações de Professores (para autocomplete)
+        // Obter lista única de professores
         public async Task<List<string>> GetProfessoresAsync()
         {
             var turmas = await GetTurmasAsync();
@@ -228,7 +238,8 @@ namespace DiarioEscolar.Services
 
             return professoresUnicos.OrderBy(p => p).ToList();
         }
-
+        
+        // Obter dicionário de professores e suas disciplinas
         public async Task<Dictionary<string, string>> GetProfessoresDisciplinasAsync()
         {
             var turmas = await GetTurmasAsync();
@@ -238,7 +249,7 @@ namespace DiarioEscolar.Services
             {
                 foreach (var horario in turma.Horarios)
                 {
-                    if (!string.IsNullOrWhiteSpace(horario.Professor) && 
+                    if (!string.IsNullOrWhiteSpace(horario.Professor) &&
                         !professoresDisciplinas.ContainsKey(horario.Professor))
                     {
                         professoresDisciplinas[horario.Professor] = horario.Disciplina;
@@ -247,7 +258,7 @@ namespace DiarioEscolar.Services
 
                 foreach (var diario in turma.Diarios)
                 {
-                    if (!string.IsNullOrWhiteSpace(diario.ProfessorNome) && 
+                    if (!string.IsNullOrWhiteSpace(diario.ProfessorNome) &&
                         !professoresDisciplinas.ContainsKey(diario.ProfessorNome))
                     {
                         professoresDisciplinas[diario.ProfessorNome] = diario.Disciplina;
@@ -258,11 +269,11 @@ namespace DiarioEscolar.Services
             return professoresDisciplinas;
         }
 
-        // Métodos auxiliares
+        // Filtrar professores por termo de busca
         public async Task<List<string>> FilterProfessoresAsync(string input)
         {
             var professores = await GetProfessoresAsync();
-            
+
             if (string.IsNullOrWhiteSpace(input))
             {
                 return professores;
